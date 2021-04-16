@@ -2,8 +2,7 @@
 
 #include <cpprest/json.h>
 
-web::json::value readJsonFile(std::string const &jsonFileName)
-{
+web::json::value readJsonFile(std::string const &jsonFileName) {
     web::json::value output;
 
     try

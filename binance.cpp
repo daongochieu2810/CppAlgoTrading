@@ -4,6 +4,12 @@
 
 ApiService apiService(binanceHost);
 
+
+void botData::getOrderBook() {
+    /api/v3/depth
+}
+
+
 // Do not run this frequently in prod, as it retrieves ALL exchange pairs
 void botData::getExchangeInfo()
 {
