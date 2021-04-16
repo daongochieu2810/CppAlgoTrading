@@ -1,6 +1,6 @@
-#include "binance.h"
+#include "Binance.h"
 #include "ApiService.h"
-#include "utils.h"
+#include "Utils.h"
 
 ApiService apiService(binanceHost);
 
