@@ -16,7 +16,8 @@ class ApiService
     std::string baseUrl;
 public:
     ApiService(std::string);
-    pplx::task<http_response> request(method, std::string, std::unordered_map<std::string, std::string>, bool);
+    pplx::task<http_response> request(method, std::string, 
+    std::unordered_map<std::string, std::string>, bool isSaveAsJson = false, std::string fileName = "");
 };
 
 #endif

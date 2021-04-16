@@ -6,30 +6,16 @@ ApiService apiService(binanceHost);
 
 
 void botData::getOrderBook() {
-    /api/v3/depth
+    std::unordered_map<std::string, std::string> params;
+    apiService.request(methods::GET, "/api/v3/depth", params, true, "order_book_info.json");
 }
 
 
 // Do not run this frequently in prod, as it retrieves ALL exchange pairs
 void botData::getExchangeInfo()
 {
-    auto fileStream = std::make_shared<ostream>();
-
     std::unordered_map<std::string, std::string> params;
-    pplx::task<void> requestTask = fstream::open_ostream(U("exchange_info.json")).then([=](ostream outFile) {
-        *fileStream = outFile;
-        return apiService.request(methods::GET, "/api/v3/exchangeInfo", params);
-    }).then([=](http_response response){
-        return response.body().read_to_end(fileStream->streambuf());
-    }).then([=](size_t) {
-        fileStream->close();
-    });
-
-    try {
-        requestTask.wait();
-    } catch (const std::exception &e) {
-        printf("Error exception:%s\n", e.what());
-    }
+    apiService.request(methods::GET, "/api/v3/exchangeInfo", params, true, "exchange_info.json");
 }
 
 void botData::setUpKeys()

@@ -8,7 +8,8 @@ ApiService::ApiService(std::string _baseUrl)
 pplx::task<http_response> ApiService::request(method _method,
                                               std::string url, 
                                               std::unordered_map<std::string, std::string> params,
-                                              bool isSaveAsJson)
+                                              bool isSaveAsJson,
+                                              std::string fileName)
 {
     pplx::task<http_response> response;
     http_client client(U(baseUrl));
@@ -18,6 +19,7 @@ pplx::task<http_response> ApiService::request(method _method,
     {
         builder.append_query(U(param.first), U(param.second));
     }
+
     response = client.request(_method, builder.to_string()); 
     if (!isSaveAsJson) {
         return response;
@@ -25,9 +27,9 @@ pplx::task<http_response> ApiService::request(method _method,
 
     auto fileStream = std::make_shared<ostream>();
 
-    pplx::task<void> requestTask = fstream::open_ostream(U("exchange_info.json")).then([=](ostream outFile) {
+    pplx::task<void> requestTask = fstream::open_ostream(U(fileName)).then([=](ostream outFile) {
         *fileStream = outFile;
-        return request(methods::GET, "/api/v3/exchangeInfo", params);
+        return response;
     }).then([=](http_response response){
         return response.body().read_to_end(fileStream->streambuf());
     }).then([=](size_t) {
