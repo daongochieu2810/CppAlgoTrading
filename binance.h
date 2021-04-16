@@ -42,7 +42,7 @@ public:
     void setSellPercent();
     void checkConnectivity();
     void getExchangeInfo();
-    void getOrderBook();
+    void getOrderBook(std::string, int limit = 100);
     void getPrice(const std::string);
     void formatPrice(json::value const &);
     void getTime();

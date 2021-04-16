@@ -4,9 +4,11 @@
 
 ApiService apiService(binanceHost);
 
-
-void botData::getOrderBook() {
+void botData::getOrderBook(std::string symbol, int limit) {
     std::unordered_map<std::string, std::string> params;
+    params.insert(std::make_pair("symbol", symbol));
+    params.insert(std::make_pair("limit",std::to_string(limit)));
+
     apiService.request(methods::GET, "/api/v3/depth", params, true, "order_book_info.json");
 }
 
@@ -67,5 +69,6 @@ int main(int argc, char *argv[])
 {
     init();
     //bot.getExchangeInfo();
+    bot.getOrderBook("BTCUSDT");
     return 0;
 }
