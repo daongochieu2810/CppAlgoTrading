@@ -2,6 +2,7 @@
 #define binance_h
 
 #define binanceHost "https://api.binance.com/"
+#define binanceFutureTestnet "https://testnet.binancefuture.com/"
 
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>

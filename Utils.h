@@ -2,7 +2,8 @@
 
 #include <cpprest/json.h>
 
-web::json::value readJsonFile(std::string const &jsonFileName) {
+web::json::value readJsonFile(std::string const &jsonFileName)
+{
     web::json::value output;
 
     try
@@ -10,7 +11,6 @@ web::json::value readJsonFile(std::string const &jsonFileName) {
         std::ifstream f(jsonFileName);
 
         std::stringstream strStream;
-
         strStream << f.rdbuf();
         f.close();
 

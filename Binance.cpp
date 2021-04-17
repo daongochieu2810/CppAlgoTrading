@@ -2,22 +2,22 @@
 #include "ApiService.h"
 #include "Utils.h"
 
-ApiService apiService(binanceHost);
+ApiService apiService(binanceFutureTestnet);
 
-void botData::getOrderBook(std::string symbol, int limit) {
+void botData::getOrderBook(std::string symbol, int limit)
+{
     std::unordered_map<std::string, std::string> params;
     params.insert(std::make_pair("symbol", symbol));
-    params.insert(std::make_pair("limit",std::to_string(limit)));
+    params.insert(std::make_pair("limit", std::to_string(limit)));
 
-    apiService.request(methods::GET, "/api/v3/depth", params, true, "order_book_info.json");
+    apiService.request(methods::GET, "/fapi/v1/depth", params, true, "order_book_info.json");
 }
-
 
 // Do not run this frequently in prod, as it retrieves ALL exchange pairs
 void botData::getExchangeInfo()
 {
     std::unordered_map<std::string, std::string> params;
-    apiService.request(methods::GET, "/api/v3/exchangeInfo", params, true, "exchange_info.json");
+    apiService.request(methods::GET, "/fapi/v1/exchangeInfo", params, true, "exchange_info.json");
 }
 
 void botData::setUpKeys()
@@ -55,9 +55,11 @@ void botData::getTime()
 void botData::checkConnectivity()
 {
     std::unordered_map<std::string, std::string> params;
-    apiService.request(methods::GET, "/api/v3/ping", params).then([=](http_response response) {
-        printf("Received response status code:%u\n", response.status_code());
-    }).wait();
+    apiService.request(methods::GET, "/fapi/v1/ping", params)
+        .then([=](http_response response) {
+            printf("Received response status code:%u\n", response.status_code());
+        })
+        .wait();
 }
 
 void init()
