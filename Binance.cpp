@@ -4,6 +4,24 @@
 
 ApiService apiService(binanceFutureTestnet);
 
+void botData::getPriceAction(std::string symbol, std::string interval, long startTime, long endTime, int limit)
+{
+    std::unordered_map<std::string, std::string> params;
+    params.insert(std::make_pair("symbol", symbol));
+    params.insert(std::make_pair("interval", interval));
+    if (startTime != -1)
+    {
+        params.insert(std::make_pair("startTime", std::to_string(startTime)));
+    }
+    if (endTime != -1)
+    {
+        params.insert(std::make_pair("endTime", std::to_string(endTime)));
+    }
+    params.insert(std::make_pair("limit", std::to_string(limit)));
+
+    apiService.request(methods::GET, "/fapi/v1/klines", params, true, "price_action_candlestick.json");
+}
+
 void botData::getOrderBook(std::string symbol, int limit)
 {
     std::unordered_map<std::string, std::string> params;
@@ -71,6 +89,7 @@ int main(int argc, char *argv[])
 {
     init();
     //bot.getExchangeInfo();
-    bot.getOrderBook("BTCUSDT");
+    //bot.getOrderBook("BTCUSDT");
+    bot.getPriceAction("BTCUSDT", "1d", -1, -1, 100);
     return 0;
 }

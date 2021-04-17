@@ -41,6 +41,7 @@ public:
     void setPair();
     void setPrice(double foundPrice);
     void setSellPercent();
+    void getPriceAction(std::string, std::string, long startTime = -1, long endTime = -1, int limit = 500);
     void checkConnectivity();
     void getExchangeInfo();
     void getOrderBook(std::string, int limit = 100);
