@@ -4,7 +4,8 @@
 
 ApiService apiService(binanceFutureTestnet);
 
-void BotData::getPriceAction(std::string symbol, std::string interval, long startTime, long endTime, int limit)
+void BotData::getPriceAction(std::string symbol, std::string interval, long startTime, long endTime,
+                             int limit, void callback(std::vector<CandlestickData>))
 {
     std::unordered_map<std::string, std::string> params;
     params.insert(std::make_pair("symbol", symbol));
@@ -19,7 +20,31 @@ void BotData::getPriceAction(std::string symbol, std::string interval, long star
     }
     params.insert(std::make_pair("limit", std::to_string(limit)));
 
-    apiService.request(methods::GET, "/fapi/v1/klines", params, true, "price_action_candlestick.json");
+    apiService.request(methods::GET, "/fapi/v1/klines", params)
+        .then([=](http_response response) {
+            response.extract_json()
+                .then([=](json::value jsonData) {
+                    std::vector<CandlestickData> candlesticks;
+                    for (int i = 0; i < limit; i++)
+                    {
+                        CandlestickData candlestick;
+                        candlestick.openTime = jsonData[i][0].as_integer();
+                        candlestick.open = std::stod(jsonData[i][1].as_string());
+                        candlestick.high = std::stod(jsonData[i][2].as_string());
+                        candlestick.low = std::stod(jsonData[i][3].as_string());
+                        candlestick.close = std::stod(jsonData[i][4].as_string());
+                        candlestick.volume = std::stod(jsonData[i][5].as_string());
+                        candlestick.closeTime = jsonData[i][6].as_integer();
+                        candlesticks.push_back(candlestick);
+                    }
+                    if (callback != NULL)
+                    {
+                        callback(candlesticks);
+                    }
+                })
+                .wait();
+        })
+        .wait();
 }
 
 void BotData::getOrderBook(std::string symbol, int limit)
@@ -90,8 +115,7 @@ int main(int argc, char *argv[])
     init();
     //bot.getExchangeInfo();
     //bot.getOrderBook("BTCUSDT");
-    //bot.getPriceAction("BTCUSDT", "1d", -1, -1, 100);
-    json::value candlesticks = readJsonFile("price_action_candlestick.json");
-    std::cout << candlesticks[0][0] << std::endl;
+    bot.getPriceAction(
+        "BTCUSDT", "1d", -1, -1, 100, [](std::vector<CandlestickData> x) -> void { std::cout << "GOT U" << std::endl; });
     return 0;
 }

@@ -24,6 +24,14 @@ using namespace web::http::client;
 using namespace concurrency::streams;
 using namespace std::chrono;
 
+class CandlestickData
+{
+public:
+    long openTime, closeTime;
+    double open, high, close, low, volume, quoteAssetVolume;
+    int numberOfTrades;
+};
+
 class BotData
 {
     double price, pastPrice, sellPercent, RSI;
@@ -41,7 +49,8 @@ public:
     void setPair();
     void setPrice(double foundPrice);
     void setSellPercent();
-    void getPriceAction(std::string, std::string, long startTime = -1, long endTime = -1, int limit = 500);
+    void getPriceAction(std::string, std::string, long startTime = -1, long endTime = -1,
+                        int limit = 500, void (*)(std::vector<CandlestickData>) = NULL);
     void checkConnectivity();
     void getExchangeInfo();
     void getOrderBook(std::string, int limit = 100);
