@@ -24,7 +24,7 @@ using namespace web::http::client;
 using namespace concurrency::streams;
 using namespace std::chrono;
 
-class botData
+class BotData
 {
     double price, pastPrice, sellPercent, RSI;
     std::vector<long> openTime, closeTime, numTrades;

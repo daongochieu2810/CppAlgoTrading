@@ -4,7 +4,7 @@
 
 ApiService apiService(binanceFutureTestnet);
 
-void botData::getPriceAction(std::string symbol, std::string interval, long startTime, long endTime, int limit)
+void BotData::getPriceAction(std::string symbol, std::string interval, long startTime, long endTime, int limit)
 {
     std::unordered_map<std::string, std::string> params;
     params.insert(std::make_pair("symbol", symbol));
@@ -22,7 +22,7 @@ void botData::getPriceAction(std::string symbol, std::string interval, long star
     apiService.request(methods::GET, "/fapi/v1/klines", params, true, "price_action_candlestick.json");
 }
 
-void botData::getOrderBook(std::string symbol, int limit)
+void BotData::getOrderBook(std::string symbol, int limit)
 {
     std::unordered_map<std::string, std::string> params;
     params.insert(std::make_pair("symbol", symbol));
@@ -32,13 +32,13 @@ void botData::getOrderBook(std::string symbol, int limit)
 }
 
 // Do not run this frequently in prod, as it retrieves ALL exchange pairs
-void botData::getExchangeInfo()
+void BotData::getExchangeInfo()
 {
     std::unordered_map<std::string, std::string> params;
     apiService.request(methods::GET, "/fapi/v1/exchangeInfo", params, true, "exchange_info.json");
 }
 
-void botData::setUpKeys()
+void BotData::setUpKeys()
 {
     std::string line;
     bool isSecretKey = true;
@@ -62,7 +62,7 @@ void botData::setUpKeys()
     }
 }
 
-void botData::getTime()
+void BotData::getTime()
 {
     struct timeval tp;
     gettimeofday(&tp, NULL);
@@ -70,7 +70,7 @@ void botData::getTime()
     std::string time = std::to_string(mslong);
 }
 
-void botData::checkConnectivity()
+void BotData::checkConnectivity()
 {
     std::unordered_map<std::string, std::string> params;
     apiService.request(methods::GET, "/fapi/v1/ping", params)
@@ -90,6 +90,8 @@ int main(int argc, char *argv[])
     init();
     //bot.getExchangeInfo();
     //bot.getOrderBook("BTCUSDT");
-    bot.getPriceAction("BTCUSDT", "1d", -1, -1, 100);
+    //bot.getPriceAction("BTCUSDT", "1d", -1, -1, 100);
+    json::value candlesticks = readJsonFile("price_action_candlestick.json");
+    std::cout << candlesticks[0][0] << std::endl;
     return 0;
 }
