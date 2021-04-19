@@ -10,14 +10,17 @@ void BotData::getPriceAction(std::string symbol, std::string interval, long star
     std::unordered_map<std::string, std::string> params;
     params.insert(std::make_pair("symbol", symbol));
     params.insert(std::make_pair("interval", interval));
+
     if (startTime != -1)
     {
         params.insert(std::make_pair("startTime", std::to_string(startTime)));
     }
+
     if (endTime != -1)
     {
         params.insert(std::make_pair("endTime", std::to_string(endTime)));
     }
+
     params.insert(std::make_pair("limit", std::to_string(limit)));
 
     apiService.request(methods::GET, "/fapi/v1/klines", params)
@@ -28,13 +31,13 @@ void BotData::getPriceAction(std::string symbol, std::string interval, long star
                     for (int i = 0; i < limit; i++)
                     {
                         CandlestickData candlestick;
-                        candlestick.openTime = jsonData[i][0].as_integer();
+                        candlestick.openTime = jsonData[i][0].as_number().to_uint64();
                         candlestick.open = std::stod(jsonData[i][1].as_string());
                         candlestick.high = std::stod(jsonData[i][2].as_string());
                         candlestick.low = std::stod(jsonData[i][3].as_string());
                         candlestick.close = std::stod(jsonData[i][4].as_string());
                         candlestick.volume = std::stod(jsonData[i][5].as_string());
-                        candlestick.closeTime = jsonData[i][6].as_integer();
+                        candlestick.closeTime = jsonData[i][6].as_number().to_uint64();
                         candlesticks.push_back(candlestick);
                     }
                     if (callback != NULL)
@@ -116,6 +119,14 @@ int main(int argc, char *argv[])
     //bot.getExchangeInfo();
     //bot.getOrderBook("BTCUSDT");
     bot.getPriceAction(
-        "BTCUSDT", "1d", -1, -1, 100, [](std::vector<CandlestickData> x) -> void { std::cout << "GOT U" << std::endl; });
+        "BTCUSDT", "1d", -1, -1, 100, [](std::vector<CandlestickData> x) -> void {
+            for (CandlestickData candlestick : x)
+            {
+                std::cout << candlestick.openTime << "\n";
+                std::cout << candlestick.closeTime << "\n";
+                std::cout << std::setprecision(10) << candlestick.open << "\n";
+                std::cout << std::setprecision(10) << candlestick.high << "\n";
+            }
+        });
     return 0;
 }
