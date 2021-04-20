@@ -1,4 +1,4 @@
 .vscode
 secrets.txt
 *.exe
-./twsapi/IBJts/builds/*.o
+twsapi/IBJts/builds/*.o
