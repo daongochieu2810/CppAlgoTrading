@@ -1,11 +1,13 @@
 #include "Binance.h"
 #include "ApiService.h"
 #include "Utils.h"
+#include "TechnicalAnalysis.h"
 
 ApiService apiService(binanceFutureTestnet);
+TechnicalAnalysis technicalAnalysis;
 
 void BotData::getPriceAction(std::string symbol, std::string interval, long startTime, long endTime,
-                             int limit, void callback(std::vector<CandlestickData>))
+                             int limit, void callback(std::vector<HistoricalData>))
 {
     std::unordered_map<std::string, std::string> params;
     params.insert(std::make_pair("symbol", symbol));
@@ -27,10 +29,10 @@ void BotData::getPriceAction(std::string symbol, std::string interval, long star
         .then([=](http_response response) {
             response.extract_json()
                 .then([=](json::value jsonData) {
-                    std::vector<CandlestickData> candlesticks;
+                    std::vector<HistoricalData> candlesticks;
                     for (int i = 0; i < limit; i++)
                     {
-                        CandlestickData candlestick;
+                        HistoricalData candlestick;
                         candlestick.openTime = jsonData[i][0].as_number().to_uint64();
                         candlestick.open = std::stod(jsonData[i][1].as_string());
                         candlestick.high = std::stod(jsonData[i][2].as_string());
@@ -113,20 +115,25 @@ void init()
     bot.setUpKeys();
 }
 
+void printHistoricalData()
+{
+    for (HistoricalData candlestick : technicalAnalysis.data)
+    {
+        std::cout << candlestick.openTime << "\n";
+        std::cout << candlestick.closeTime << "\n";
+        std::cout << std::setprecision(10) << candlestick.open << "\n";
+        std::cout << std::setprecision(10) << candlestick.high << "\n";
+    }
+}
+
 int main(int argc, char *argv[])
 {
     init();
     //bot.getExchangeInfo();
     //bot.getOrderBook("BTCUSDT");
     bot.getPriceAction(
-        "BTCUSDT", "1d", -1, -1, 100, [](std::vector<CandlestickData> x) -> void {
-            for (CandlestickData candlestick : x)
-            {
-                std::cout << candlestick.openTime << "\n";
-                std::cout << candlestick.closeTime << "\n";
-                std::cout << std::setprecision(10) << candlestick.open << "\n";
-                std::cout << std::setprecision(10) << candlestick.high << "\n";
-            }
+        "BTCUSDT", "1d", -1, -1, 100, [](std::vector<HistoricalData> x) -> void {
+            technicalAnalysis.setData(x);
         });
     return 0;
 }

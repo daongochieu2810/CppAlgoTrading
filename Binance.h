@@ -17,20 +17,14 @@
 #include <boost/algorithm/string.hpp>
 #include <stdlib.h>
 
+#include "TechnicalAnalysis.h"
+
 using namespace utility;
 using namespace web;
 using namespace web::http;
 using namespace web::http::client;
 using namespace concurrency::streams;
 using namespace std::chrono;
-
-class CandlestickData
-{
-public:
-    long openTime, closeTime;
-    double open, high, close, low, volume, quoteAssetVolume;
-    int numberOfTrades;
-};
 
 class BotData
 {
@@ -50,7 +44,7 @@ public:
     void setPrice(double foundPrice);
     void setSellPercent();
     void getPriceAction(std::string, std::string, long startTime = -1, long endTime = -1,
-                        int limit = 500, void (*)(std::vector<CandlestickData>) = NULL);
+                        int limit = 500, void (*)(std::vector<HistoricalData>) = NULL);
     void checkConnectivity();
     void getExchangeInfo();
     void getOrderBook(std::string, int limit = 100);
