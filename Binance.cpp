@@ -2,6 +2,7 @@
 #include "ApiService.h"
 #include "Utils.h"
 #include "TechnicalAnalysis.h"
+#include "AccountSummaryTags.h"
 
 ApiService apiService(binanceFutureTestnet);
 TechnicalAnalysis technicalAnalysis;
@@ -137,7 +138,7 @@ void benchmarkPerformance(void fnc())
 
 int main(int argc, char *argv[])
 {
-    benchmarkPerformance([]() -> void {
+    /*benchmarkPerformance([]() -> void {
         init();
         //bot.getExchangeInfo();
         //bot.getOrderBook("BTCUSDT");
@@ -147,6 +148,8 @@ int main(int argc, char *argv[])
                 //printHistoricalData();
                 technicalAnalysis.calcEMA(50, technicalAnalysis.data.fiftyEMA);
             });
-    });
+    });*/
+    AccountSummaryTags acc;
+    std::cout << acc.getAllTags() << std::endl;
     return 0;
 }
