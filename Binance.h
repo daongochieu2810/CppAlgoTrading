@@ -44,7 +44,7 @@ public:
     void setPrice(double foundPrice);
     void setSellPercent();
     void getPriceAction(std::string, std::string, long startTime = -1, long endTime = -1,
-                        int limit = 500, void (*)(std::vector<HistoricalData>) = NULL);
+                        int limit = 500, void (*)(HistoricalData &) = NULL);
     void checkConnectivity();
     void getExchangeInfo();
     void getOrderBook(std::string, int limit = 100);

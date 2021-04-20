@@ -7,7 +7,7 @@ ApiService apiService(binanceFutureTestnet);
 TechnicalAnalysis technicalAnalysis;
 
 void BotData::getPriceAction(std::string symbol, std::string interval, long startTime, long endTime,
-                             int limit, void callback(std::vector<HistoricalData>))
+                             int limit, void callback(HistoricalData &))
 {
     std::unordered_map<std::string, std::string> params;
     params.insert(std::make_pair("symbol", symbol));
@@ -29,22 +29,20 @@ void BotData::getPriceAction(std::string symbol, std::string interval, long star
         .then([=](http_response response) {
             response.extract_json()
                 .then([=](json::value jsonData) {
-                    std::vector<HistoricalData> candlesticks;
+                    HistoricalData candlestick;
                     for (int i = 0; i < limit; i++)
                     {
-                        HistoricalData candlestick;
-                        candlestick.openTime = jsonData[i][0].as_number().to_uint64();
-                        candlestick.open = std::stod(jsonData[i][1].as_string());
-                        candlestick.high = std::stod(jsonData[i][2].as_string());
-                        candlestick.low = std::stod(jsonData[i][3].as_string());
-                        candlestick.close = std::stod(jsonData[i][4].as_string());
-                        candlestick.volume = std::stod(jsonData[i][5].as_string());
-                        candlestick.closeTime = jsonData[i][6].as_number().to_uint64();
-                        candlesticks.push_back(candlestick);
+                        candlestick.openTime.push_back(jsonData[i][0].as_number().to_uint64());
+                        candlestick.open.push_back(std::stod(jsonData[i][1].as_string()));
+                        candlestick.high.push_back(std::stod(jsonData[i][2].as_string()));
+                        candlestick.low.push_back(std::stod(jsonData[i][3].as_string()));
+                        candlestick.close.push_back(std::stod(jsonData[i][4].as_string()));
+                        candlestick.volume.push_back(std::stod(jsonData[i][5].as_string()));
+                        candlestick.closeTime.push_back(jsonData[i][6].as_number().to_uint64());
                     }
                     if (callback != NULL)
                     {
-                        callback(candlesticks);
+                        callback(candlestick);
                     }
                 })
                 .wait();
@@ -117,23 +115,38 @@ void init()
 
 void printHistoricalData()
 {
-    for (HistoricalData candlestick : technicalAnalysis.data)
+    for (double openPrice : technicalAnalysis.data.open)
     {
-        std::cout << candlestick.openTime << "\n";
-        std::cout << candlestick.closeTime << "\n";
-        std::cout << std::setprecision(10) << candlestick.open << "\n";
-        std::cout << std::setprecision(10) << candlestick.high << "\n";
+        std::cout << std::setprecision(10) << openPrice << "\n";
     }
+
+    for (double closePrice : technicalAnalysis.data.close)
+    {
+        std::cout << std::setprecision(10) << closePrice << "\n";
+    }
+}
+
+void benchmarkPerformance(void fnc())
+{
+    auto t1 = high_resolution_clock::now();
+    fnc();
+    auto t2 = high_resolution_clock::now();
+    duration<double, std::milli> ms_double = t2 - t1;
+    std::cout << ms_double.count() << "ms\n";
 }
 
 int main(int argc, char *argv[])
 {
-    init();
-    //bot.getExchangeInfo();
-    //bot.getOrderBook("BTCUSDT");
-    bot.getPriceAction(
-        "BTCUSDT", "1d", -1, -1, 100, [](std::vector<HistoricalData> x) -> void {
-            technicalAnalysis.setData(x);
-        });
+    benchmarkPerformance([]() -> void {
+        init();
+        //bot.getExchangeInfo();
+        //bot.getOrderBook("BTCUSDT");
+        bot.getPriceAction(
+            "BTCUSDT", "1d", -1, -1, 200, [](HistoricalData &x) -> void {
+                technicalAnalysis.setData(x);
+                //printHistoricalData();
+                technicalAnalysis.calcEMA(50, technicalAnalysis.data.fiftyEMA);
+            });
+    });
     return 0;
 }

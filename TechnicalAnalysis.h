@@ -2,25 +2,18 @@
 #define TechnicalAnalysis_h
 
 #include <vector>
-class HistoricalData
-{
-public:
-    long openTime, closeTime;
-    double open, high, close, low, volume, quoteAssetVolume;
-    int numberOfTrades;
-};
+#include "MarketData.h"
 
 class TechnicalAnalysis
 {
 public:
-    std::vector<HistoricalData> data;
-    void setData(std::vector<HistoricalData> &);
+    HistoricalData data;
+    void setData(HistoricalData &);
     //EMAs
-    double calcFiftyEMA();
-    double calcHundredEMA();
-    double calcTwoHundredEMA();
+    void calcEMA(const int, std::vector<double> &);
+
     //SMAs
-    double calcFiftySMA();
+    void calcSMA(const int, std::vector<double> &);
 };
 
 #endif
