@@ -90,14 +90,6 @@ void BotData::setUpKeys()
     }
 }
 
-void BotData::getTime()
-{
-    struct timeval tp;
-    gettimeofday(&tp, NULL);
-    long long mslong = (long long)tp.tv_sec * 1000L + tp.tv_usec / 1000;
-    std::string time = std::to_string(mslong);
-}
-
 void BotData::checkConnectivity()
 {
     std::unordered_map<std::string, std::string> params;

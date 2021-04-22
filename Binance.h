@@ -9,6 +9,7 @@
 #include <cpprest/ws_client.h>
 #include <openssl/hmac.h>
 #include <iostream>
+#include <cstdarg>
 #include <string>
 #include <stdio.h>
 #include <iomanip>
@@ -32,7 +33,6 @@ class BotData
     std::vector<long double> open, high, low, close, volume, quoteAssetVolume, takerBuyAssetVol, takerBuyQuoteAssetVol, Ignore;
     bool algoCheck, algoBuy;
     std::string pair;
-    std::string epochTime;
     std::string signature;
     std::string secretKey;
     std::string apiKey;
@@ -49,8 +49,8 @@ public:
     void getOrderBook(std::string, int limit = 100);
     void getPrice(const std::string);
     void formatPrice(json::value const &);
-    void getTime();
     void HMACsha256(std::string const &, std::string const &);
+    void newOrder(int num, ...);
     void checkBuy();
     void checkSell();
     void getHistoricalPrices();
