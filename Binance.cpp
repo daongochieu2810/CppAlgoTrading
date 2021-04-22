@@ -2,7 +2,6 @@
 #include "ApiService.h"
 #include "Utils.h"
 #include "TechnicalAnalysis.h"
-#include "AccountSummaryTags.h"
 
 ApiService apiService(binanceFutureTestnet);
 TechnicalAnalysis technicalAnalysis;
@@ -149,7 +148,5 @@ int main(int argc, char *argv[])
                 technicalAnalysis.calcEMA(50, technicalAnalysis.data.fiftyEMA);
             });
     });*/
-    AccountSummaryTags acc;
-    std::cout << acc.getAllTags() << std::endl;
     return 0;
 }
