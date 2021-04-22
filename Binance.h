@@ -42,7 +42,7 @@ public:
     void setPair();
     void setPrice(double foundPrice);
     void setSellPercent();
-    void getPriceAction(std::string, std::string, long startTime = -1, long endTime = -1,
+    void getPriceAction(std::string const &, std::string const &, long startTime = -1, long endTime = -1,
                         int limit = 500, void (*)(HistoricalData &) = NULL);
     void checkConnectivity();
     void getExchangeInfo();
@@ -50,7 +50,7 @@ public:
     void getPrice(const std::string);
     void formatPrice(json::value const &);
     void HMACsha256(std::string const &, std::string const &);
-    void newOrder(int num, ...);
+    void newOrder(Order const &);
     void checkBuy();
     void checkSell();
     void getHistoricalPrices();

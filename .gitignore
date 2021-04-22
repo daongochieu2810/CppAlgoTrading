@@ -1,4 +1,5 @@
 .vscode
 secrets.txt
+secrets_futures_testnet.txt
 *.exe
 twsapi/IBJts/builds/*.o

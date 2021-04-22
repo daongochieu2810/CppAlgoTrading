@@ -1,18 +1,37 @@
 #include "ApiService.h"
+#include <iostream>
 
 ApiService::ApiService(std::string _baseUrl)
 {
     baseUrl = _baseUrl;
 }
 
+void ApiService::setApiKey(std::string _apiKey)
+{
+    apiKey = _apiKey;
+}
+
+void ApiService::getQueryString(std::unordered_map<std::string, std::string> &params, std::string &copy)
+{
+    uri_builder builder;
+
+    for (auto param : params)
+    {
+        builder.append_query(U(param.first), U(param.second));
+    }
+
+    copy = builder.query();
+}
+
 pplx::task<http_response> ApiService::request(method _method,
                                               std::string url,
-                                              std::unordered_map<std::string, std::string> params,
+                                              std::unordered_map<std::string, std::string> &params,
                                               bool isSaveAsJson,
                                               std::string fileName)
 {
     pplx::task<http_response> response;
     http_client client(U(baseUrl));
+    http_request request(_method);
     uri_builder builder(U(url));
 
     for (auto param : params)
@@ -20,7 +39,10 @@ pplx::task<http_response> ApiService::request(method _method,
         builder.append_query(U(param.first), U(param.second));
     }
 
-    response = client.request(_method, builder.to_string());
+    request.set_request_uri(builder.to_string());
+    request.headers().add("X-MBX-APIKEY", apiKey);
+    response = client.request(request);
+
     if (!isSaveAsJson)
     {
         return response;

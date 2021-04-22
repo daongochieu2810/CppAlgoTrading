@@ -13,23 +13,15 @@ using namespace web::http::client;
 using namespace concurrency::streams;
 class ApiService
 {
-    std::string baseUrl;
+    std::string baseUrl, apiKey;
 
 public:
     ApiService(std::string);
+    void setApiKey(std::string);
     pplx::task<http_response> request(method, std::string,
-                                      std::unordered_map<std::string, std::string>,
+                                      std::unordered_map<std::string, std::string> &,
                                       bool isSaveAsJson = false, std::string fileName = "");
-};
-
-class Order
-{
-public:
-    std::string symbol, side, positionSide, type, timeInForce,
-        newClientOrderId, workingType, newOrderRespType, recvWindow;
-    double quantity, price, stopPrice, activationPrice, callbackRate;
-    long timestamp;
-    bool reduceOnly, closePosition, priceProtect;
+    void getQueryString(std::unordered_map<std::string, std::string> &, std::string &);
 };
 
 #endif

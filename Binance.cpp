@@ -6,7 +6,37 @@
 ApiService apiService(binanceFutureTestnet);
 TechnicalAnalysis technicalAnalysis;
 
-void BotData::getPriceAction(std::string symbol, std::string interval, long startTime, long endTime,
+void BotData::newOrder(Order const &order)
+{
+    //for now, all orders will be of type LIMIT
+    std::unordered_map<std::string, std::string> params;
+    //mandatory
+    params.insert(std::make_pair("symbol", order.symbol));
+    params.insert(std::make_pair("side", order.side));
+    params.insert(std::make_pair("type", order.type));
+    params.insert(std::make_pair("timeInForce", "GTC"));
+    params.insert(std::make_pair("timestamp", std::to_string(order.timestamp)));
+    //optional, but necessary for the profit
+    params.insert(std::make_pair("quantity", std::to_string(order.quantity)));
+    params.insert(std::make_pair("price", std::to_string(order.price))); //for LIMIT orders
+    //for SIGNED endpoints
+    std::string message;
+    apiService.getQueryString(params, message);
+    bot.HMACsha256(message, bot.secretKey);
+    params.insert(std::make_pair("signature", bot.signature));
+
+    apiService.request(methods::POST, "/fapi/v1/order", params)
+        .then([](http_response response) {
+            response.extract_string()
+                .then([](std::string res) {
+                    std::cout << res << std::endl;
+                })
+                .wait();
+        })
+        .wait();
+}
+
+void BotData::getPriceAction(std::string const &symbol, std::string const &interval, long startTime, long endTime,
                              int limit, void callback(HistoricalData &))
 {
     std::unordered_map<std::string, std::string> params;
@@ -70,8 +100,8 @@ void BotData::setUpKeys()
 {
     std::string line;
     bool isSecretKey = true;
-    ifstream_t secrets("secrets.txt");
-
+    //ifstream_t secrets("secrets.txt");
+    ifstream_t secrets("secrets_futures_testnet.txt");
     if (secrets.is_open())
     {
         while (getline(secrets, line))
@@ -84,6 +114,7 @@ void BotData::setUpKeys()
             else
             {
                 bot.apiKey = line;
+                apiService.setApiKey(line);
             }
         }
         secrets.close();
@@ -149,11 +180,51 @@ void benchmarkPerformance(void fnc())
     std::cout << ms_double.count() << "ms\n";
 }
 
+inline auto binary_to_hex_digit(unsigned a) -> char
+{
+    return a + (a < 10 ? '0' : 'a' - 10);
+}
+
+auto binary_to_hex(unsigned char const *binary, unsigned binary_len) -> std::string
+{
+    std::string r(binary_len * 2, '\0');
+    for (unsigned i = 0; i < binary_len; ++i)
+    {
+        r[i * 2] = binary_to_hex_digit(binary[i] >> 4);
+        r[i * 2 + 1] = binary_to_hex_digit(binary[i] & 15);
+    }
+    return r;
+}
+
+void BotData::HMACsha256(std::string const &message, std::string const &key)
+{
+    unsigned char result[EVP_MAX_MD_SIZE];
+    unsigned result_len = 0;
+    HMAC(EVP_sha256(), key.data(), key.size(),
+         reinterpret_cast<unsigned char const *>(message.data()), message.size(), result, &result_len);
+    signature = binary_to_hex(result, result_len);
+}
+
+void getTime(long &time)
+{
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    time = (long)tp.tv_sec * 1000L + tp.tv_usec / 1000;
+}
+
 int main(int argc, char *argv[])
 {
     benchmarkPerformance([]() -> void {
         init();
-        bot.getPriceAction(
+        Order order;
+        order.symbol = "BTCUSDT";
+        order.type = "LIMIT";
+        order.side = "BUY";
+        getTime(order.timestamp);
+        order.quantity = 0.1;
+        order.price = 53600.0;
+        bot.newOrder(order);
+        /*bot.getPriceAction(
             "BTCUSDT", "15m", -1, -1, 200, [](HistoricalData &x) -> void {
                 technicalAnalysis.setData(x);
             });
@@ -177,7 +248,7 @@ int main(int argc, char *argv[])
 
             //wait for 15 mins
             sleep(900);
-        }
+        }*/
     });
 
     return 0;
