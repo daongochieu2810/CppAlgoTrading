@@ -124,6 +124,28 @@ void printHistoricalData()
     {
         std::cout << std::setprecision(10) << closePrice << "\n";
     }
+    /*for (double ema : technicalAnalysis.data.fiftyEMA)
+        {
+            std::cout << std::setprecision(10) << ema << ", ";
+        }
+
+        std::cout << std::endl
+                  << "------------------------" << std::endl;
+
+        for (double ema : technicalAnalysis.tempData.close)
+        {
+            std::cout << std::setprecision(10) << ema << ", ";
+        }
+
+        std::cout << std::endl
+                  << "------------------------" << std::endl;
+
+        for (double ema : technicalAnalysis.data.fiftyEMA)
+        {
+            std::cout << std::setprecision(10) << ema << ", ";
+        }
+
+        std::cout << std::endl;*/
 }
 
 void benchmarkPerformance(void fnc())
@@ -137,16 +159,34 @@ void benchmarkPerformance(void fnc())
 
 int main(int argc, char *argv[])
 {
-    /*benchmarkPerformance([]() -> void {
+    benchmarkPerformance([]() -> void {
         init();
-        //bot.getExchangeInfo();
-        //bot.getOrderBook("BTCUSDT");
         bot.getPriceAction(
-            "BTCUSDT", "1d", -1, -1, 200, [](HistoricalData &x) -> void {
+            "BTCUSDT", "15m", -1, -1, 200, [](HistoricalData &x) -> void {
                 technicalAnalysis.setData(x);
-                //printHistoricalData();
-                technicalAnalysis.calcEMA(50, technicalAnalysis.data.fiftyEMA);
             });
-    });*/
+        while (1)
+        {
+            //thread t1 is used to prepare data for next time frame
+            std::thread t1(&BotData::getPriceAction, bot, "BTCUSDT", "15m", -1, -1, 200,
+                           [](HistoricalData &x) -> void {
+                               technicalAnalysis.setTempData(x);
+                           });
+
+            //other threads produce technical indicators
+            std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 50, std::ref(technicalAnalysis.data.fiftyEMA));
+            std::thread t3(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.twoHundredEMA));
+
+            t1.join();
+            t2.join();
+            t3.join();
+
+            technicalAnalysis.setData(technicalAnalysis.tempData);
+
+            //wait for 15 mins
+            sleep(900);
+        }
+    });
+
     return 0;
 }

@@ -10,7 +10,6 @@
 #include <openssl/hmac.h>
 #include <iostream>
 #include <string>
-#include <chrono>
 #include <stdio.h>
 #include <iomanip>
 #include <vector>

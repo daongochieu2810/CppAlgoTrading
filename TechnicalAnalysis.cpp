@@ -1,9 +1,14 @@
-#include "TechnicalAnalysis.h"
 #include <iostream>
+#include "TechnicalAnalysis.h"
 
 void TechnicalAnalysis::setData(HistoricalData &data)
 {
     this->data = data;
+}
+
+void TechnicalAnalysis::setTempData(HistoricalData &data)
+{
+    this->tempData = data;
 }
 
 void TechnicalAnalysis::calcEMA(int period, std::vector<double> &emaData)
@@ -15,7 +20,7 @@ void TechnicalAnalysis::calcEMA(int period, std::vector<double> &emaData)
 
     if (closePrices.size() <= period)
     {
-        throw "Not enough data for " + std::to_string(period) + " days";
+        std::cout << "Not enough data for " + std::to_string(period) + " days" << std::endl;
         return;
     }
 
@@ -26,7 +31,6 @@ void TechnicalAnalysis::calcEMA(int period, std::vector<double> &emaData)
     }
 
     sma = sum / period;
-    std::cout << "SMA is " << sma << std::endl;
     tempEma.push_back(sma);
     this->data.addData(emaData, sma);
 
@@ -38,5 +42,4 @@ void TechnicalAnalysis::calcEMA(int period, std::vector<double> &emaData)
         emaIndex++;
         this->data.addData(emaData, tempEma[emaIndex]);
     }
-    std::cout << std::endl;
 }

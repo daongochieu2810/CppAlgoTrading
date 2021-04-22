@@ -7,8 +7,9 @@
 class TechnicalAnalysis
 {
 public:
-    HistoricalData data;
+    HistoricalData data, tempData;
     void setData(HistoricalData &);
+    void setTempData(HistoricalData &);
     //EMAs
     void calcEMA(const int, std::vector<double> &);
 

@@ -20,3 +20,9 @@ void HistoricalData::addData(std::vector<double> &dataToUpdate, const double &ne
 {
     dataToUpdate.push_back(newData);
 }
+
+void HistoricalData::clearTa()
+{
+    this->fiftyEMA.clear();
+    this->twoHundredEMA.clear();
+}
