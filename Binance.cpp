@@ -1,7 +1,6 @@
 #include "Binance.h"
 #include "ApiService.h"
 #include "Utils.h"
-#include "TechnicalAnalysis.h"
 
 ApiService apiService(binanceFutureTestnet);
 TechnicalAnalysis technicalAnalysis;

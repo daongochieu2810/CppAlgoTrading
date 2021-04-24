@@ -2,4 +2,6 @@
 secrets.txt
 secrets_futures_testnet.txt
 *.exe
+
 twsapi/IBJts/builds/*.o
+twsapi/IBJts/samples/Cpp/TestCppClient/results.txt
