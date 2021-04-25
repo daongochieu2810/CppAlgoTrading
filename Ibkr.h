@@ -3,6 +3,9 @@
 
 #include <string>
 
+#define LOCAL_HOST "127.0.0.1"
+#define DEFAULT_PORT "7497"
+
 class BotData
 {
     std::string apiKey;
