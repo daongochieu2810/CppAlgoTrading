@@ -8,4 +8,4 @@ INCLUDES=-I${API_BASE_SRC_DIR} -I${API_SAMPLE_DIR}
 binance:
 	g++ -std=c++11 $(INCLUDES) $(Helpers) Binance.cpp $(TWS) -o Binance.exe $(CFLAGS)
 ibkr:
-	g++ -std=c++11 $(INCLUDES) $(Helpers) Ibkr.cpp $(TWS) -o Ibkr.exe $(CFLAGS)
+	g++ -std=c++11 $(INCLUDES) $(Helpers) IbkrClient.cpp Ibkr.cpp $(TWS) -o Ibkr.exe $(CFLAGS)

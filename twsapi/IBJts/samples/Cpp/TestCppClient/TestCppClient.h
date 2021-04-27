@@ -14,7 +14,8 @@
 
 class EClientSocket;
 
-enum State {
+enum State
+{
 	ST_CONNECT,
 	ST_TICKDATAOPERATION,
 	ST_TICKDATAOPERATION_ACK,
@@ -88,18 +89,18 @@ enum State {
 	ST_REROUTECFD_ACK,
 	ST_MARKETRULE,
 	ST_MARKETRULE_ACK,
-    ST_PNL,
-    ST_PNL_ACK,
-    ST_PNLSINGLE,
-    ST_PNLSINGLE_ACK,
-    ST_CONTFUT,
-    ST_CONTFUT_ACK,
+	ST_PNL,
+	ST_PNL_ACK,
+	ST_PNLSINGLE,
+	ST_PNLSINGLE_ACK,
+	ST_CONTFUT,
+	ST_CONTFUT_ACK,
 	ST_PING,
 	ST_PING_ACK,
-    ST_REQHISTORICALTICKS,
-    ST_REQHISTORICALTICKS_ACK,
-    ST_REQTICKBYTICKDATA,
-    ST_REQTICKBYTICKDATA_ACK,
+	ST_REQHISTORICALTICKS,
+	ST_REQHISTORICALTICKS_ACK,
+	ST_REQTICKBYTICKDATA,
+	ST_REQTICKBYTICKDATA_ACK,
 	ST_WHATIFSAMPLES,
 	ST_WHATIFSAMPLES_ACK,
 	ST_IDLE
@@ -108,24 +109,22 @@ enum State {
 //! [ewrapperimpl]
 class TestCppClient : public EWrapper
 {
-//! [ewrapperimpl]
+	//! [ewrapperimpl]
 public:
-
 	TestCppClient();
 	~TestCppClient();
 
-	void setConnectOptions(const std::string&);
+	void setConnectOptions(const std::string &);
 	void processMessages();
 
 public:
-
-	bool connect(const char * host, int port, int clientId = 0);
+	bool connect(const char *host, int port, int clientId = 0);
 	void disconnect() const;
 	bool isConnected() const;
 
 private:
-    void pnlOperation();
-    void pnlSingleOperation();
+	void pnlOperation();
+	void pnlSingleOperation();
 	void tickDataOperation();
 	void tickOptionComputationOperation();
 	void delayedTickDataOperation();
@@ -162,36 +161,34 @@ private:
 	void rerouteCFDOperations();
 	void marketRuleOperations();
 	void continuousFuturesOperations();
-    void reqHistoricalTicks();
-    void reqTickByTickData();
+	void reqHistoricalTicks();
+	void reqTickByTickData();
 	void whatIfSamples();
 
 	void reqCurrentTime();
 
 public:
-	// events
-	#include "EWrapper_prototypes.h"
-
+// events
+#include "EWrapper_prototypes.h"
 
 private:
-	void printContractMsg(const Contract& contract);
-	void printContractDetailsMsg(const ContractDetails& contractDetails);
+	void printContractMsg(const Contract &contract);
+	void printContractDetailsMsg(const ContractDetails &contractDetails);
 	void printContractDetailsSecIdList(const TagValueListSPtr &secIdList);
-	void printBondContractDetailsMsg(const ContractDetails& contractDetails);
+	void printBondContractDetailsMsg(const ContractDetails &contractDetails);
 
 private:
 	//! [socket_declare]
 	EReaderOSSignal m_osSignal;
-	EClientSocket * const m_pClient;
+	EClientSocket *const m_pClient;
 	//! [socket_declare]
 	State m_state;
 	time_t m_sleepDeadline;
 
 	OrderId m_orderId;
 	EReader *m_pReader;
-    bool m_extraAuth;
+	bool m_extraAuth;
 	std::string m_bboExchange;
 };
 
 #endif
-
