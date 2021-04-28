@@ -57,3 +57,17 @@ Settings: Heikin Ashi Candlesticks
 - The above is true for a downtrend. If the downtrend is unable to reach 30 or below and then rallies above 70, that downtrend has weakened and could be reversing to the upside (trendlines + MAs can be used together with RSI to reinforce this pattern)
 
 #### RSI Divergences:
+
+- A bullish divergence occurs when RSI creates an oversold reading followed by a higher low (in RSI) that matches correspondingly lower lows in the stock's price -> this indicates rising bullish momentum, and a break above oversold territory could be used to trigger a new long position
+- A bearish divergence occurs when the RSI creates an overbought reading followed by a lower high that matches corresponding higher highs in the price
+- Divergences can be rare when a stock is in a stable long-term trend
+
+#### RSI Swing Rejections:
+
+- RSI's behaviours when it re-emerges from overbought/oversold conditions -> this is called swing rejection. It has 4 parts:
+  | Bullish | Bearish |
+  | --------|---------|
+  | - RSI falls into oversold territory | - RSI rises into the overbought territory |
+  | - RSI crosses back above 30% | - RSI crosses back below 70% |
+  | - RSI forms another dip without crossing back into oversold territory | - RSI forms another high without crossing back into overbought territory |
+  | - RSI then breaks its most recent high | - RSI then breaks its most recent low |
