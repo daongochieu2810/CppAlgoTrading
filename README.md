@@ -74,3 +74,10 @@ Settings: Heikin Ashi Candlesticks
 - Bearish signals during downward trends are less likely to generate false alarms
 
 ###### RSI is most useful in an oscillating market where the price is alternating between bullish and bearish movements
+
+### Moving Averages Covergence Divergence (MACD):
+
+- MACD shows the relationship between 2 MAs. 9-day EMA of MACD is called the `signal line`, which is plotted on top of the MACD line -> functions as a trigger for buy/sell signals e.g buy when MACD crosses above the signal line and sell/short when it goes below the signal line
+- Formula: MACD = 12-day EMA - 26-day EMA
+- The more distant MACD is above/below its baseline the more distant the 2 MAs are from each other
+- MACD is often displayed with a histogram showing the distance between MACD and its signal line. If MACD is above the signal line, the histogram will be above MACD's baseline -> this can be used to identify when bullish/bearish momentum is high

@@ -1,7 +1,6 @@
 .vscode
-secrets.txt
-secrets_futures_testnet.txt
+*.txt
 *.exe
+gmon.out
 
 twsapi/IBJts/builds/*.o
-twsapi/IBJts/samples/Cpp/TestCppClient/results.txt

@@ -9,3 +9,7 @@ binance:
 	g++ -std=c++11 $(INCLUDES) $(Helpers) Binance.cpp $(TWS) -o Binance.exe $(CFLAGS)
 ibkr:
 	g++ -std=c++11 $(INCLUDES) $(Helpers) IbkrClient.cpp Ibkr.cpp $(TWS) -o Ibkr.exe $(CFLAGS)
+binance_prof:
+	g++ -std=c++11 $(INCLUDES) $(Helpers) Binance.cpp $(TWS) -o Binance.exe $(CFLAGS) -pg
+ibkr_prof:
+	g++ -std=c++11 $(INCLUDES) $(Helpers) IbkrClient.cpp Ibkr.cpp $(TWS) -o Ibkr.exe $(CFLAGS) -pg
