@@ -67,7 +67,10 @@ Settings: Heikin Ashi Candlesticks
 - RSI's behaviours when it re-emerges from overbought/oversold conditions -> this is called swing rejection. It has 4 parts:
   | Bullish | Bearish |
   | --------|---------|
-  | - RSI falls into oversold territory | - RSI rises into the overbought territory |
-  | - RSI crosses back above 30% | - RSI crosses back below 70% |
-  | - RSI forms another dip without crossing back into oversold territory | - RSI forms another high without crossing back into overbought territory |
-  | - RSI then breaks its most recent high | - RSI then breaks its most recent low |
+  | RSI falls into oversold territory | RSI rises into the overbought territory |
+  | RSI crosses back above 30% | RSI crosses back below 70% |
+  | RSI forms another dip without crossing back into oversold territory | RSI forms another high without crossing back into overbought territory |
+  | RSI then breaks its most recent high | RSI then breaks its most recent low |
+- Bearish signals during downward trends are less likely to generate false alarms
+
+###### RSI is most useful in an oscillating market where the price is alternating between bullish and bearish movements
