@@ -52,6 +52,8 @@ Settings: Heikin Ashi Candlesticks
 - RSI will rise as the number and size of positive closes increase, and it will fall as the number and size of losses increase
 - The 2nd part smooths the result so the RSI will only be near 100 or 0 in a strongly trending market
 - Notes: RSI can stay in the overbought region for extended periods while the stock is an uptrend, the same goes for oversold and downtrend
-- Overbought and oversold levels usually require modification through the usage of horizontal channel in the long-term
+- Overbought and oversold levels usually do not require modification through the usage of horizontal channel in the long-term
+- During an uptrend, RSI tends to stay above 30 and should frequently hit 70; during a downtrend, it is rare to see the RSI exceed 70, and it should frequently hits <= 30 e.g if the RSI isnt able to reach 70 on a number of price swings during an uptrend, but then drop below 30 -> the trend has weakened and could be reversing lower
+- The above is true for a downtrend. If the downtrend is unable to reach 30 or below and then rallies above 70, that downtrend has weakened and could be reversing to the upside (trendlines + MAs can be used together with RSI to reinforce this pattern)
 
-#### Horizontal Channel:
+#### RSI Divergences:
