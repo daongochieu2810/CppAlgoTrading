@@ -5,7 +5,7 @@ Settings: Heikin Ashi Candlesticks
 
 # Technical Indicators:
 
-## Moving Averages (MA):
+## Moving Averages (MAs):
 
 - All MA commonly used are lagging indicators
 - MAs should only be used to confirm a market move or to indicate ts strength. By the time a MA shows trend changes, the optimal time to enter the trade has already passed
@@ -34,3 +34,24 @@ Settings: Heikin Ashi Candlesticks
 - Formula: EMA_today = EMA_yesterday + (Value_today - EMA_yesterday) \* (Smoothing/(1 + Days))
 - Most common choice for Smoothing is 2. The significance of recent data points increases proportionally wrt this factor
 - EMA reacts to changes faster than SMA -> it alleviates the negative impact of lags to some extent -> more applicable to fast-moving markets
+
+## Momentum Indicators (MIs):
+
+- MIs are used to determine the strength or weakness of a stock's price. MIs measure the rate of change of a stock's price
+- MIs are far more useful during rising markets than during falling markets (historically, markets rise more often than they fall i.e bull markets tend to last longer than bear markets)
+
+### Relative Strength Index (RSI):
+
+- RSI measures the magnitude of recent price changes to evaluate overbought/oversold conditions in the price of a stock. RSI is displayed as an oscillator (a line graph moving between 2 extremes 0 and 100)
+- Common usage: RSI having values over 70 indicates an overbought condition and a trend reversal/corrective pullback is expected; RSI below 30 indicates an oversold/undervalued condition
+- Formula: 2 steps:
+  - Step 1: RSI_step1 = 100 - \[100/(1 + Avg_gain/Avg_loss)\]
+  - Standard value for the lookback period is 14
+  - Curr_Avg_gain = Prev_Avg_gain x 13 + Curr_gain
+  - Step 2: RSI_step2 = 100 - \[100/(1 + Curr_Avg_gain/Curr_Avg_loss)\]
+- RSI will rise as the number and size of positive closes increase, and it will fall as the number and size of losses increase
+- The 2nd part smooths the result so the RSI will only be near 100 or 0 in a strongly trending market
+- Notes: RSI can stay in the overbought region for extended periods while the stock is an uptrend, the same goes for oversold and downtrend
+- Overbought and oversold levels usually require modification through the usage of horizontal channel in the long-term
+
+#### Horizontal Channel:
