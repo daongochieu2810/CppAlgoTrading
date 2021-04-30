@@ -78,6 +78,19 @@ Settings: Heikin Ashi Candlesticks
 ### Moving Averages Covergence Divergence (MACD):
 
 - MACD shows the relationship between 2 MAs. 9-day EMA of MACD is called the `signal line`, which is plotted on top of the MACD line -> functions as a trigger for buy/sell signals e.g buy when MACD crosses above the signal line and sell/short when it goes below the signal line
+- Crossovers are more reliable when they conform to the prevailing trend
+- If the MACD crosses above its signal line following a brief correction within a longer-term uptrend, it qualifies as a bullish confirmation
+- If the MACD crosses below its signal line following a brief move higher within a longer-term downtrend, it qualifies as a bearish confirmation
 - Formula: MACD = 12-day EMA - 26-day EMA
 - The more distant MACD is above/below its baseline the more distant the 2 MAs are from each other
 - MACD is often displayed with a histogram showing the distance between MACD and its signal line. If MACD is above the signal line, the histogram will be above MACD's baseline -> this can be used to identify when bullish/bearish momentum is high
+- Both MACD and RSI can signal an upcoming trend change by showing divergence from price. However these signals can be false positives, and they often occur when the price of an asset moves sidewat (e.g in a range or triangle pattern following a trend). A slowdown in the momentum (sideways momentum or slow trending movement) of the price will cause the MACD to pull away from its prior extremes and gravitate towards the 0 lines even in the absence of a true reversal
+
+#### MACD Divergences:
+
+- A bullish divergence appears when the MACD forms 2 rising lows that correspond with 2 falling lows on the price. This is a valid bullish signal when the long-term trend is still positive (less reliable otherwise)
+- A bearish divergence appears when the MACD forms 2 falling highs that corresponds to 2 rising highs on the price. A bearish divergence that appears during a long-term bearish trend is considered a confirmation that the trend is likely to continue
+
+#### MACD Rapid Rises/Falls:
+
+- When the MACD rises/falls rapidly, it is a signal that the security is overbought/oversold and will soon return to normal levels (this should be combined with RSI for more reliable predictions)
