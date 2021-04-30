@@ -223,31 +223,31 @@ int main(int argc, char *argv[])
         order.quantity = 0.1;
         order.price = 53600.0;
         bot.newOrder(order);
-        /*bot.getPriceAction(
+        bot.getPriceAction(
             "BTCUSDT", "15m", -1, -1, 200, [](HistoricalData &x) -> void {
                 technicalAnalysis.setData(x);
             });
-        while (1)
-        {
-            //thread t1 is used to prepare data for next time frame
-            std::thread t1(&BotData::getPriceAction, bot, "BTCUSDT", "15m", -1, -1, 200,
-                           [](HistoricalData &x) -> void {
-                               technicalAnalysis.setTempData(x);
-                           });
+        //while (1)
+        //{
+        //thread t1 is used to prepare data for next time frame
+        std::thread t1(&BotData::getPriceAction, bot, "BTCUSDT", "15m", -1, -1, 500,
+                       [](HistoricalData &x) -> void {
+                           technicalAnalysis.setTempData(x);
+                       });
 
-            //other threads produce technical indicators
-            std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 50, std::ref(technicalAnalysis.data.fiftyEMA));
-            std::thread t3(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.twoHundredEMA));
+        //other threads produce technical indicators
+        std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 50, std::ref(technicalAnalysis.data.fiftyEMA));
+        std::thread t3(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.twoHundredEMA));
 
-            t1.join();
-            t2.join();
-            t3.join();
+        t1.join();
+        t2.join();
+        t3.join();
 
-            technicalAnalysis.setData(technicalAnalysis.tempData);
+        technicalAnalysis.setData(technicalAnalysis.tempData);
 
-            //wait for 15 mins
-            sleep(900);
-        }*/
+        //wait for 15 mins
+        //sleep(900);
+        //}
     });
 
     return 0;

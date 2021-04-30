@@ -1,0 +1,6 @@
+#!/bin/bash
+
+#uncomment based on what to profile
+#HEAPPROFILE=/tmp/heapprof $1
+#HEAPCHECK=normal $1
+CPUPROFILE=/tmp/prof.out $1
