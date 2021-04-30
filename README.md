@@ -96,3 +96,28 @@
 #### MACD Rapid Rises/Falls:
 
 - When the MACD rises/falls rapidly, it is a signal that the security is overbought/oversold and will soon return to normal levels (this should be combined with RSI for more reliable predictions)
+
+# Heikin-Ashi:
+
+- Heikin-Ashi is useful to make charts more readable and make trends easier to analyze
+- Formula:
+  - Close = 0.25(OldOpen + OldHigh + OldLow + OldClose)
+  - Open = 0.5(OldOpen + OldClose)
+  - High = max(OldHigh, OldOpen, OldClose)
+  - Low = min(OldLow, OldOpen, OldClose)
+- 5 primary signals:
+  - Hollow/green candles with no lower shadows indicate a strong uptrend i.e Low = Open
+  - Hollow/green candles signify an uptrend (less reliable than the above)
+  - Candles with a small body surrounded by upper and lower shadows indicate a trend change i.e Close and High are close
+  - Filled/red candles indicate a downtrend
+  - Filled/red candles indicate a downtrend with no higher shadows identify a strong downtrend (more reliable than the above)
+
+# Basic Algo Trading Strategies:
+
+## Trend-following:
+
+## Arbitrage Opportunities:
+
+## Index Fund Rebalancing:
+
+## Dark Ice (IBKR):
