@@ -12,6 +12,8 @@ public:
     HistoricalData data, tempData;
     void setData(HistoricalData &);
     void setTempData(HistoricalData &);
+    //Heikin-Ashi
+    void setUpHeikinAshi();
     //MAs
     void calcEMA(const int, std::vector<double> &);
     void calcSMA(const int, std::vector<double> &);

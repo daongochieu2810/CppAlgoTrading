@@ -10,6 +10,31 @@ void TechnicalAnalysis::setTempData(HistoricalData &data)
     this->tempData = data;
 }
 
+void TechnicalAnalysis::setUpHeikinAshi()
+{
+    std::vector<double> close, open, low, high;
+    this->data.accessClose(close);
+    this->data.accessClose(open);
+    this->data.accessLow(low);
+    this->data.accessHigh(high);
+
+    double prevCloseHa, prevOpenHa;
+
+    for (int i = 1; i < close.size(); i++)
+    {
+        double currCloseHa = (close[i] + open[i] + low[i] + high[i]) / 4;
+        double currOpenHa = i == 0 ? (open[i] + close[i]) / 2 : (prevOpenHa + prevCloseHa) / 2;
+
+        this->data.addData(this->data.closeHa, currCloseHa);
+        this->data.addData(this->data.openHa, currOpenHa);
+        this->data.addData(this->data.highHa, std::max(currCloseHa, currOpenHa, high[i]));
+        this->data.addData(this->data.lowHa, std::min(currOpenHa, currCloseHa, low[i]));
+
+        prevCloseHa = currCloseHa;
+        prevOpenHa = currOpenHa;
+    }
+}
+
 void TechnicalAnalysis::calcEMA(int period, std::vector<double> &emaData)
 {
     double ema = 0.0, sma = 0.0, sum = 0.0, multiplier = 0.0;
@@ -116,5 +141,9 @@ void TechnicalAnalysis::calcRSI(int period, std::vector<double> &rsiData)
 }
 
 void TechnicalAnalysis::calcStoch(int period, std::vector<double> &stochData)
+{
+}
+
+void TechnicalAnalysis::calcPSAR(int period, std::vector<double> &stochData)
 {
 }
