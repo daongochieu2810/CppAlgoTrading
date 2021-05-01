@@ -97,6 +97,31 @@
 
 - When the MACD rises/falls rapidly, it is a signal that the security is overbought/oversold and will soon return to normal levels (this should be combined with RSI for more reliable predictions)
 
+## Trend Indicators:
+
+### Parabolic Stop and Reverse (Parabolic SAR):
+
+- Parabolic SAR is used to determine the price direction of an asset & draw attention to when the price direction is changing
+- Formula:
+
+  - Uptrend: RSAR = Prev PSAR + Prior AF(Prior EP - Prior PSAR)
+  - Downtrend: FPSAR = Prev PSAR - Prior AF(Prior EP - Prior PSAR)
+  - AF: Acceleration Factor: starts at 0.02 and increases by 0.02, up to a max of 0.2, each time the extreme point makes a new low (falling SAR - FSAR) or high (rising SAR - RSAR)
+  - EP: Extreme Point: the lowest low in the current downtrend or the highest high in the current uptrend
+  - Notes:
+    - If the SAR is initially rising and the price as a close below the rising SAR value, then the trend is now down and the FSAR formula will be used. If the price rises above the FSAR, then switch to the rising formula
+    - Monitor prices for at least 5 periods, recording the EPs
+    - If the price is rising, use the lowest low of the periods above as the initial PSAR value; if the price is falling, use the highest high as the initial PSAR value
+
+- A dot below the price is considered a bullish signal
+- When the dot flips, it indicates a potential change in price
+- Stochastic + MA + ADX can complement SAR to avoid false signals
+- SAR sell signals are more convincing when the price is trading below a long-term MA. This suggests that the sellers are in control of the direction and that the recent SAR sell signal could be the beginning of another way lower
+- Similarly, if the price is above the MA, focus on taking the buy signals
+- SAR performs best in markets with a steady trend. In ranging markets, the SAR tends to whipsaw back and forth, generating false trading signals
+
+##### The parabolic SAR is used to gauge a stock's direction and for placing stop-loss orders
+
 # Heikin-Ashi:
 
 - Heikin-Ashi is useful to make charts more readable and make trends easier to analyze
@@ -111,13 +136,3 @@
   - Candles with a small body surrounded by upper and lower shadows indicate a trend change i.e Close and High are close
   - Filled/red candles indicate a downtrend
   - Filled/red candles indicate a downtrend with no higher shadows identify a strong downtrend (more reliable than the above)
-
-# Basic Algo Trading Strategies:
-
-## Trend-following:
-
-## Arbitrage Opportunities:
-
-## Index Fund Rebalancing:
-
-## Dark Ice (IBKR):
