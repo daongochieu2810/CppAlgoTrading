@@ -12,7 +12,7 @@ public:
     std::vector<long> openTime, closeTime;
     std::vector<double> open, high, close, low, volume, quoteAssetVolume;
     std::vector<int> numberOfTrades;
-    std::vector<double> fiftyEMA, twoHundredEMA;
+    std::vector<double> fiftyEMA, twoHundredEMA, fiftySMA, twoHundredSMA, rsi, pSar, bollingerBands, stochastic;
     void accessClose(boost::optional<std::vector<double> &>);
     void getClose(std::vector<double> &) const;
     void addData(std::vector<double> &, const double &);

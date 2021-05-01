@@ -49,7 +49,7 @@
 - Formula: 2 steps:
   - Step 1: RSI_step1 = 100 - \[100/(1 + Avg_gain/Avg_loss)\]
   - Standard value for the lookback period is 14
-  - Curr_Avg_gain = Prev_Avg_gain x 13 + Curr_gain
+  - Curr_Avg_gain = (Prev_Avg_gain x 13 + Curr_gain)/14
   - Step 2: RSI_step2 = 100 - \[100/(1 + Curr_Avg_gain/Curr_Avg_loss)\]
 - RSI will rise as the number and size of positive closes increase, and it will fall as the number and size of losses increase
 - The 2nd part smooths the result so the RSI will only be near 100 or 0 in a strongly trending market

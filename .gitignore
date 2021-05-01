@@ -1,6 +1,5 @@
 .vscode
 *.txt
 *.exe
-gmon.out
 
 twsapi/IBJts/builds/*.o
