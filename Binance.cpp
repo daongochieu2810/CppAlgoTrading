@@ -4,6 +4,7 @@
 
 ApiService apiService(binanceFutureTestnet);
 TechnicalAnalysis technicalAnalysis;
+Strategy strategy;
 
 void BotData::newOrder(Order const &order)
 {
@@ -24,7 +25,7 @@ void BotData::newOrder(Order const &order)
     bot.HMACsha256(message, bot.secretKey);
     params.insert(std::make_pair("signature", bot.signature));
 
-    apiService.request(methods::POST, "/fapi/v1/order", params)
+    apiService.request(methods::POST, "/order", params)
         .then([](http_response response) {
             response.extract_string()
                 .then([](std::string res) {
@@ -54,7 +55,7 @@ void BotData::getPriceAction(std::string const &symbol, std::string const &inter
 
     params.insert(std::make_pair("limit", std::to_string(limit)));
 
-    apiService.request(methods::GET, "/fapi/v1/klines", params)
+    apiService.request(methods::GET, "/klines", params)
         .then([=](http_response response) {
             response.extract_json()
                 .then([=](json::value jsonData) {
@@ -85,14 +86,14 @@ void BotData::getOrderBook(std::string symbol, int limit)
     params.insert(std::make_pair("symbol", symbol));
     params.insert(std::make_pair("limit", std::to_string(limit)));
 
-    apiService.request(methods::GET, "/fapi/v1/depth", params, true, "order_book_info.json");
+    apiService.request(methods::GET, "/depth", params, true, "order_book_info.json");
 }
 
 // Do not run this frequently in prod, as it retrieves ALL exchange pairs
 void BotData::getExchangeInfo()
 {
     std::unordered_map<std::string, std::string> params;
-    apiService.request(methods::GET, "/fapi/v1/exchangeInfo", params, true, "exchange_info.json");
+    apiService.request(methods::GET, "/exchangeInfo", params, true, "exchange_info.json");
 }
 
 void BotData::setUpKeys()
@@ -100,7 +101,7 @@ void BotData::setUpKeys()
     std::string line;
     bool isSecretKey = true;
     //ifstream_t secrets("secrets.txt");
-    ifstream_t secrets("secrets_futures_testnet.txt");
+    ifstream_t secrets("secrets_spot_testnet.txt");
     if (secrets.is_open())
     {
         while (getline(secrets, line))
@@ -123,7 +124,7 @@ void BotData::setUpKeys()
 void BotData::checkConnectivity()
 {
     std::unordered_map<std::string, std::string> params;
-    apiService.request(methods::GET, "/fapi/v1/ping", params)
+    apiService.request(methods::GET, "/ping", params)
         .then([=](http_response response) {
             printf("Received response status code:%u\n", response.status_code());
         })
@@ -211,43 +212,61 @@ void getTime(long &time)
     time = (long)tp.tv_sec * 1000L + tp.tv_usec / 1000;
 }
 
+void execOnSinglePair(const std::string &pair)
+{
+    bot.getPriceAction(
+        pair, "5m", -1, -1, 500, [](HistoricalData &x) -> void {
+            technicalAnalysis.setData(x);
+        });
+    while (1)
+    {
+        //thread t1 is used to prepare data for next time frame
+        std::thread t1(&BotData::getPriceAction, bot, pair, "5m", -1, -1, 500,
+                       [](HistoricalData &x) -> void {
+                           technicalAnalysis.setTempData(x);
+                       });
+
+        //other threads produce technical indicators
+        std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.fiftyEMA));
+        std::thread t3(&TechnicalAnalysis::calcPSAR, technicalAnalysis, std::ref(technicalAnalysis.data.pSar));
+        std::thread t4(&TechnicalAnalysis::setUpHeikinAshi, technicalAnalysis);
+
+        t2.join();
+        t3.join();
+        t4.join();
+
+        strategy.simpleHeikinAshiPsarEMA(technicalAnalysis.data.openHa, technicalAnalysis.data.closeHa,
+                                         technicalAnalysis.data.highHa, technicalAnalysis.data.lowHa,
+                                         technicalAnalysis.data.pSar, technicalAnalysis.data.twoHundredEMA);
+
+        /*for (int i = 0; i < technicalAnalysis.data.pSar.size(); i++)
+        {
+            double psarValue = technicalAnalysis.data.pSar[i];
+            double high = technicalAnalysis.data.high[i];
+            double low = technicalAnalysis.data.low[i];
+            std::cout << std::setprecision(10) << psarValue << " " << high << " " << low << std::endl;
+        }*/
+
+        technicalAnalysis.setData(technicalAnalysis.tempData);
+
+        //wait for 15 mins
+        sleep(900);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     benchmarkPerformance([]() -> void {
         init();
-        Order order;
+        /*Order order;
         order.symbol = "BTCUSDT";
         order.type = "LIMIT";
         order.side = "BUY";
         getTime(order.timestamp);
         order.quantity = 0.1;
         order.price = 53600.0;
-        bot.newOrder(order);
-        bot.getPriceAction(
-            "BTCUSDT", "15m", -1, -1, 200, [](HistoricalData &x) -> void {
-                technicalAnalysis.setData(x);
-            });
-        //while (1)
-        //{
-        //thread t1 is used to prepare data for next time frame
-        std::thread t1(&BotData::getPriceAction, bot, "BTCUSDT", "15m", -1, -1, 500,
-                       [](HistoricalData &x) -> void {
-                           technicalAnalysis.setTempData(x);
-                       });
-
-        //other threads produce technical indicators
-        std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 50, std::ref(technicalAnalysis.data.fiftyEMA));
-        std::thread t3(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.twoHundredEMA));
-
-        t1.join();
-        t2.join();
-        t3.join();
-
-        technicalAnalysis.setData(technicalAnalysis.tempData);
-
-        //wait for 15 mins
-        //sleep(900);
-        //}
+        bot.newOrder(order);*/
+        execOnSinglePair("BTCUSDT");
     });
 
     return 0;

@@ -1,5 +1,5 @@
 TWS=./twsapi/IBJts/builds/*.o
-Helpers=ApiService.cpp MarketData.cpp TechnicalAnalysis.cpp
+Helpers=ApiService.cpp MarketData.cpp TechnicalAnalysis.cpp Strategy.cpp
 CFLAGS=-lboost_system -lcrypto -lssl -lcpprest -lpthread
 API_BASE_SRC_DIR=./twsapi/IBJts/source/cppclient/client
 API_SAMPLE_DIR=./twsapi/IBJts/samples/Cpp/TestCppClient

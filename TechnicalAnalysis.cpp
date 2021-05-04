@@ -2,11 +2,13 @@
 
 void TechnicalAnalysis::setData(HistoricalData &data)
 {
+    //this->data.clearData();
     this->data = data;
 }
 
 void TechnicalAnalysis::setTempData(HistoricalData &data)
 {
+    //this->tempData.clearData();
     this->tempData = data;
 }
 
@@ -27,8 +29,8 @@ void TechnicalAnalysis::setUpHeikinAshi()
 
         this->data.addData(this->data.closeHa, currCloseHa);
         this->data.addData(this->data.openHa, currOpenHa);
-        this->data.addData(this->data.highHa, std::max(currCloseHa, currOpenHa, high[i]));
-        this->data.addData(this->data.lowHa, std::min(currOpenHa, currCloseHa, low[i]));
+        this->data.addData(this->data.highHa, std::max(currCloseHa, std::max(currOpenHa, high[i])));
+        this->data.addData(this->data.lowHa, std::min(currOpenHa, std::min(currCloseHa, low[i])));
 
         prevCloseHa = currCloseHa;
         prevOpenHa = currOpenHa;
@@ -144,6 +146,70 @@ void TechnicalAnalysis::calcStoch(int period, std::vector<double> &stochData)
 {
 }
 
-void TechnicalAnalysis::calcPSAR(int period, std::vector<double> &stochData)
+void TechnicalAnalysis::calcPSAR(std::vector<double> &psarData)
 {
+    double af = 0.0;
+    const double afStep = 0.02, maxAf = 0.2;
+    std::vector<double> psars, high, low;
+
+    this->data.accessHigh(high);
+    this->data.accessLow(low);
+
+    bool isUp = (high[1] >= high[0] || low[0] <= low[1]) ? true : false;
+    double psar = isUp ? low[0] : high[0];
+    double ep = isUp ? high[0] : low[0];
+
+    psars.push_back(psar);
+
+    for (int i = 1; i < high.size(); i++)
+    {
+        double nextPsar;
+        if (isUp)
+        {
+            //higher high detected, increase af
+            if (high[i] > ep)
+            {
+                ep = high[i];
+                af = std::min(maxAf, af + afStep);
+            }
+
+            nextPsar = psar + af * (ep - psar);
+            //next psar cant be above prior period's low or current low
+            nextPsar = std::min(low[i], std::min(low[i - 1], nextPsar));
+            //if psar crosses the next period's price range, the trend switches
+            if (nextPsar > low[i])
+            {
+                isUp = false;
+                nextPsar = ep;
+                ep = low[i];
+                af = afStep;
+            }
+        }
+        else
+        {
+            //lower low detected, increase af
+            if (low[i] < ep)
+            {
+                ep = low[i];
+                af = std::min(maxAf, af + afStep);
+            }
+
+            nextPsar = psar + af * (ep - psar);
+            //next psar cant be below prior period's high or the current high
+            nextPsar = std::max(high[i], std::max(high[i - 1], nextPsar));
+            //if psar crosses the next period's price range, the trend switches
+            if (nextPsar < high[i])
+            {
+                isUp = true;
+                nextPsar = ep;
+                ep = high[i];
+                af = afStep;
+            }
+        }
+
+        psars.push_back(nextPsar);
+        psar = nextPsar;
+    }
+
+    psarData = psars;
 }

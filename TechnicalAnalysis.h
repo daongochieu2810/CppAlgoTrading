@@ -22,7 +22,7 @@ public:
     void calcRSI(const int, std::vector<double> &);
     void calcStoch(const int, std::vector<double> &);
     //Trend
-    void calcPSAR(const int, std::vector<double> &);
+    void calcPSAR(std::vector<double> &);
 };
 
 class Order

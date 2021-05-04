@@ -1,8 +1,9 @@
 #ifndef binance_h
 #define binance_h
 
-#define binanceHost "https://api.binance.com/"
-#define binanceFutureTestnet "https://testnet.binancefuture.com/"
+#define binanceHost "https://api.binance.com/api/v3/"
+#define binanceSpotTestnet "https://testnet.binance.vision/api/v3/"
+#define binanceFutureTestnet "https://testnet.binancefuture.com/fapi/v1/"
 
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>
@@ -18,6 +19,7 @@
 #include <stdlib.h>
 
 #include "TechnicalAnalysis.h"
+#include "Strategy.h"
 
 using namespace utility;
 using namespace web;
