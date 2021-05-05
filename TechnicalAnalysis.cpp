@@ -12,13 +12,13 @@ void TechnicalAnalysis::setTempData(HistoricalData &data)
     this->tempData = data;
 }
 
-void TechnicalAnalysis::setUpHeikinAshi()
+void TechnicalAnalysis::setUpHeikinAshi(HistoricalData &data)
 {
     std::vector<double> close, open, low, high;
-    this->data.accessClose(close);
-    this->data.accessClose(open);
-    this->data.accessLow(low);
-    this->data.accessHigh(high);
+    data.accessClose(close);
+    data.accessClose(open);
+    data.accessLow(low);
+    data.accessHigh(high);
 
     double prevCloseHa, prevOpenHa;
 
@@ -27,10 +27,10 @@ void TechnicalAnalysis::setUpHeikinAshi()
         double currCloseHa = (close[i] + open[i] + low[i] + high[i]) / 4;
         double currOpenHa = i == 0 ? (open[i] + close[i]) / 2 : (prevOpenHa + prevCloseHa) / 2;
 
-        this->data.addData(this->data.closeHa, currCloseHa);
-        this->data.addData(this->data.openHa, currOpenHa);
-        this->data.addData(this->data.highHa, std::max(currCloseHa, std::max(currOpenHa, high[i])));
-        this->data.addData(this->data.lowHa, std::min(currOpenHa, std::min(currCloseHa, low[i])));
+        data.addData(data.closeHa, currCloseHa);
+        data.addData(data.openHa, currOpenHa);
+        data.addData(data.highHa, std::max(currCloseHa, std::max(currOpenHa, high[i])));
+        data.addData(data.lowHa, std::min(currOpenHa, std::min(currCloseHa, low[i])));
 
         prevCloseHa = currCloseHa;
         prevOpenHa = currOpenHa;

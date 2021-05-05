@@ -21,7 +21,7 @@ int Strategy::simpleHeikinAshiPsarEMA(const std::vector<double> &openHa,
     int numBelowEMA = 0, numAboveEMA = 0;
     for (int i = currentIndex - noTrailing; i < closeHa.size(); i++)
     {
-        if (closeHa[i] < ema[i])
+        if (closeHa[i] < ema[i - 199])
         {
             numBelowEMA++;
         }

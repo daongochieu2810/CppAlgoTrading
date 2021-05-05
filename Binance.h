@@ -53,6 +53,7 @@ public:
     void formatPrice(json::value const &);
     void HMACsha256(std::string const &, std::string const &, std::string &);
     void newOrder(Order const &);
+    void newOco(const std::vector<Order> &);
     void checkBuy();
     void checkSell();
     void getHistoricalPrices();

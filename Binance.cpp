@@ -6,9 +6,17 @@ ApiService apiService(binanceSpotTestnet);
 TechnicalAnalysis technicalAnalysis;
 Strategy strategy;
 
+void BotData::newOco(const std::vector<Order> &orders)
+{
+    //TODO
+    const Order firstOrder = orders[0];
+    std::vector<std::pair<std::string, std::string>> params;
+    //mandatory
+    params.push_back(std::make_pair("symbol", firstOrder.symbol));
+}
+
 void BotData::newOrder(Order const &order)
 {
-    //for now, all orders will be of type LIMIT
     std::vector<std::pair<std::string, std::string>> params;
     //mandatory
     params.push_back(std::make_pair("symbol", order.symbol));
@@ -246,28 +254,18 @@ void execOnSinglePair(const std::string &pair)
         pair, "5m", -1, -1, 250, [](HistoricalData &x) -> void {
             technicalAnalysis.setData(x);
         });
-    Order order;
-    order.symbol = "BTCUSDT";
-    order.type = "STOP_LOSS_LIMIT";
-    order.side = "BUY";
-    getTime(order.timestamp);
-    order.quantity = 0.1;
-    order.price = technicalAnalysis.data.close[technicalAnalysis.data.close.size() - 1] - 1000;
-    order.stopPrice = technicalAnalysis.data.close[technicalAnalysis.data.close.size() - 1] + 10000;
-    bot.newOrder(order);
-    return;
     while (1)
     {
         //thread t1 is used to prepare data for next time frame
-        std::thread t1(&BotData::getPriceAction, bot, pair, "5m", -1, -1, 500,
+        std::thread t1(&BotData::getPriceAction, bot, pair, "5m", -1, -1, 250,
                        [](HistoricalData &x) -> void {
                            technicalAnalysis.setTempData(x);
                        });
 
         //other threads produce technical indicators
-        std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.fiftyEMA));
+        std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.twoHundredEMA));
         std::thread t3(&TechnicalAnalysis::calcPSAR, technicalAnalysis, std::ref(technicalAnalysis.data.pSar));
-        std::thread t4(&TechnicalAnalysis::setUpHeikinAshi, technicalAnalysis);
+        std::thread t4(&TechnicalAnalysis::setUpHeikinAshi, technicalAnalysis, std::ref(technicalAnalysis.data));
 
         t2.join();
         t3.join();
@@ -277,17 +275,25 @@ void execOnSinglePair(const std::string &pair)
                                                       technicalAnalysis.data.highHa, technicalAnalysis.data.lowHa,
                                                       technicalAnalysis.data.pSar, technicalAnalysis.data.twoHundredEMA);
 
+        std::cout << signal << std::endl;
+
         //if the heikin-ashi + psar + ema algo signals long position, use psar as stop loss and set rr to 2
         if (signal == 1)
         {
-            Order order;
-            order.symbol = pair;
-            order.type = "LIMIT";
-            order.side = "BUY";
-            getTime(order.timestamp);
-            order.quantity = 0.1;
-            order.price = 53600.0;
-            bot.newOrder(order);
+            int currentIndex = technicalAnalysis.data.pSar.size() - 1;
+            const double risk = technicalAnalysis.data.close[currentIndex] - technicalAnalysis.data.pSar[currentIndex];
+            const double reward = risk * 2;
+
+            Order order1;
+            order1.symbol = "BTCUSDT";
+            order1.type = "MARKET";
+            order1.side = "BUY";
+            getTime(order1.timestamp);
+            order1.quantity = 0.001;
+            order1.price = -1;
+            order1.stopPrice = -1;
+            bot.newOrder(order1);
+            //sleep(600);
         }
 
         /*for (int i = 0; i < technicalAnalysis.data.pSar.size(); i++)
@@ -298,10 +304,12 @@ void execOnSinglePair(const std::string &pair)
             std::cout << std::setprecision(10) << psarValue << " " << high << " " << low << std::endl;
         }*/
 
+        t1.join();
         technicalAnalysis.setData(technicalAnalysis.tempData);
 
-        //wait for 15 mins
-        sleep(900);
+        //wait for 5 mins
+        //sleep(300);
+        break;
     }
 }
 

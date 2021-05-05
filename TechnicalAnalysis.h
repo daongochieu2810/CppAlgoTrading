@@ -13,7 +13,7 @@ public:
     void setData(HistoricalData &);
     void setTempData(HistoricalData &);
     //Heikin-Ashi
-    void setUpHeikinAshi();
+    void setUpHeikinAshi(HistoricalData &);
     //MAs
     void calcEMA(const int, std::vector<double> &);
     void calcSMA(const int, std::vector<double> &);
