@@ -24,10 +24,9 @@ web::json::value readJsonFile(std::string const &jsonFileName)
     return output;
 }
 
-void getTime()
+void getTime(long &time)
 {
     struct timeval tp;
     gettimeofday(&tp, NULL);
-    long long mslong = (long long)tp.tv_sec * 1000L + tp.tv_usec / 1000;
-    std::string time = std::to_string(mslong);
+    time = (long)tp.tv_sec * 1000L + tp.tv_usec / 1000;
 }

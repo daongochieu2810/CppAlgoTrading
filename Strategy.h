@@ -7,10 +7,10 @@
 class Strategy
 {
 public:
-    void simpleHeikinAshiPsarEMA(const std::vector<double> &,
-                                 const std::vector<double> &, const std::vector<double> &,
-                                 const std::vector<double> &, const std::vector<double> &,
-                                 const std::vector<double> &);
+    int simpleHeikinAshiPsarEMA(const std::vector<double> &,
+                                const std::vector<double> &, const std::vector<double> &,
+                                const std::vector<double> &, const std::vector<double> &,
+                                const std::vector<double> &);
 };
 
 #endif

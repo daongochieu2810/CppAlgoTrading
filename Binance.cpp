@@ -2,28 +2,37 @@
 #include "ApiService.h"
 #include "Utils.h"
 
-ApiService apiService(binanceFutureTestnet);
+ApiService apiService(binanceSpotTestnet);
 TechnicalAnalysis technicalAnalysis;
 Strategy strategy;
 
 void BotData::newOrder(Order const &order)
 {
     //for now, all orders will be of type LIMIT
-    std::unordered_map<std::string, std::string> params;
+    std::vector<std::pair<std::string, std::string>> params;
     //mandatory
-    params.insert(std::make_pair("symbol", order.symbol));
-    params.insert(std::make_pair("side", order.side));
-    params.insert(std::make_pair("type", order.type));
-    params.insert(std::make_pair("timeInForce", "GTC"));
-    params.insert(std::make_pair("timestamp", std::to_string(order.timestamp)));
-    //optional, but necessary for the profit
-    params.insert(std::make_pair("quantity", std::to_string(order.quantity)));
-    params.insert(std::make_pair("price", std::to_string(order.price))); //for LIMIT orders
+    params.push_back(std::make_pair("symbol", order.symbol));
+    params.push_back(std::make_pair("side", order.side));
+    params.push_back(std::make_pair("type", order.type));
+    if (order.type.find("LIMIT") != std::string::npos)
+        params.push_back(std::make_pair("timeInForce", "GTC"));
+    params.push_back(std::make_pair("timestamp", std::to_string(order.timestamp)));
+    params.push_back(std::make_pair("quantity", std::to_string(order.quantity)));
+    //for limit orders
+    if (order.price > 0)
+        params.push_back(std::make_pair("price", std::to_string(order.price)));
+    //for stop orders
+    if (order.stopPrice > 0)
+        params.push_back(std::make_pair("stopPrice", std::to_string(order.stopPrice)));
+
     //for SIGNED endpoints
-    std::string message;
+    std::string message, signature;
     apiService.getQueryString(params, message);
-    bot.HMACsha256(message, bot.secretKey);
-    params.insert(std::make_pair("signature", bot.signature));
+    bot.HMACsha256(message, bot.secretKey, signature);
+    params.push_back(std::make_pair("signature", signature));
+
+    apiService.getQueryString(params, message);
+    std::cout << message << std::endl;
 
     apiService.request(methods::POST, "/order", params)
         .then([](http_response response) {
@@ -39,21 +48,21 @@ void BotData::newOrder(Order const &order)
 void BotData::getPriceAction(std::string const &symbol, std::string const &interval, long startTime, long endTime,
                              int limit, void callback(HistoricalData &))
 {
-    std::unordered_map<std::string, std::string> params;
-    params.insert(std::make_pair("symbol", symbol));
-    params.insert(std::make_pair("interval", interval));
+    std::vector<std::pair<std::string, std::string>> params;
+    params.push_back(std::make_pair("symbol", symbol));
+    params.push_back(std::make_pair("interval", interval));
 
     if (startTime != -1)
     {
-        params.insert(std::make_pair("startTime", std::to_string(startTime)));
+        params.push_back(std::make_pair("startTime", std::to_string(startTime)));
     }
 
     if (endTime != -1)
     {
-        params.insert(std::make_pair("endTime", std::to_string(endTime)));
+        params.push_back(std::make_pair("endTime", std::to_string(endTime)));
     }
 
-    params.insert(std::make_pair("limit", std::to_string(limit)));
+    params.push_back(std::make_pair("limit", std::to_string(limit)));
 
     apiService.request(methods::GET, "/klines", params)
         .then([=](http_response response) {
@@ -80,11 +89,37 @@ void BotData::getPriceAction(std::string const &symbol, std::string const &inter
         .wait();
 }
 
+void BotData::getAllOrders(std::string symbol)
+{
+    long timestamp;
+    getTime(timestamp);
+    std::vector<std::pair<std::string, std::string>> params;
+    params.push_back(std::make_pair("symbol", symbol));
+    params.push_back(std::make_pair("timestamp", std::to_string(timestamp)));
+    //for SIGNED endpoints
+    std::string message, signature;
+    apiService.getQueryString(params, message);
+    bot.HMACsha256(message, bot.secretKey, signature);
+    params.push_back(std::make_pair("signature", signature));
+    //apiService.getQueryString(params, message);
+    //std::cout << message << std::endl;
+
+    apiService.request(methods::GET, "/allOrders", params)
+        .then([](http_response response) {
+            response.extract_string()
+                .then([](std::string res) {
+                    std::cout << res << std::endl;
+                })
+                .wait();
+        })
+        .wait();
+}
+
 void BotData::getOrderBook(std::string symbol, int limit)
 {
-    std::unordered_map<std::string, std::string> params;
-    params.insert(std::make_pair("symbol", symbol));
-    params.insert(std::make_pair("limit", std::to_string(limit)));
+    std::vector<std::pair<std::string, std::string>> params;
+    params.push_back(std::make_pair("symbol", symbol));
+    params.push_back(std::make_pair("limit", std::to_string(limit)));
 
     apiService.request(methods::GET, "/depth", params, true, "order_book_info.json");
 }
@@ -92,7 +127,7 @@ void BotData::getOrderBook(std::string symbol, int limit)
 // Do not run this frequently in prod, as it retrieves ALL exchange pairs
 void BotData::getExchangeInfo()
 {
-    std::unordered_map<std::string, std::string> params;
+    std::vector<std::pair<std::string, std::string>> params;
     apiService.request(methods::GET, "/exchangeInfo", params, true, "exchange_info.json");
 }
 
@@ -123,7 +158,7 @@ void BotData::setUpKeys()
 
 void BotData::checkConnectivity()
 {
-    std::unordered_map<std::string, std::string> params;
+    std::vector<std::pair<std::string, std::string>> params;
     apiService.request(methods::GET, "/ping", params)
         .then([=](http_response response) {
             printf("Received response status code:%u\n", response.status_code());
@@ -196,7 +231,7 @@ auto binary_to_hex(unsigned char const *binary, unsigned binary_len) -> std::str
     return r;
 }
 
-void BotData::HMACsha256(std::string const &message, std::string const &key)
+void BotData::HMACsha256(std::string const &message, std::string const &key, std::string &signature)
 {
     unsigned char result[EVP_MAX_MD_SIZE];
     unsigned result_len = 0;
@@ -205,19 +240,22 @@ void BotData::HMACsha256(std::string const &message, std::string const &key)
     signature = binary_to_hex(result, result_len);
 }
 
-void getTime(long &time)
-{
-    struct timeval tp;
-    gettimeofday(&tp, NULL);
-    time = (long)tp.tv_sec * 1000L + tp.tv_usec / 1000;
-}
-
 void execOnSinglePair(const std::string &pair)
 {
     bot.getPriceAction(
-        pair, "5m", -1, -1, 500, [](HistoricalData &x) -> void {
+        pair, "5m", -1, -1, 250, [](HistoricalData &x) -> void {
             technicalAnalysis.setData(x);
         });
+    Order order;
+    order.symbol = "BTCUSDT";
+    order.type = "STOP_LOSS_LIMIT";
+    order.side = "BUY";
+    getTime(order.timestamp);
+    order.quantity = 0.1;
+    order.price = technicalAnalysis.data.close[technicalAnalysis.data.close.size() - 1] - 1000;
+    order.stopPrice = technicalAnalysis.data.close[technicalAnalysis.data.close.size() - 1] + 10000;
+    bot.newOrder(order);
+    return;
     while (1)
     {
         //thread t1 is used to prepare data for next time frame
@@ -235,9 +273,22 @@ void execOnSinglePair(const std::string &pair)
         t3.join();
         t4.join();
 
-        strategy.simpleHeikinAshiPsarEMA(technicalAnalysis.data.openHa, technicalAnalysis.data.closeHa,
-                                         technicalAnalysis.data.highHa, technicalAnalysis.data.lowHa,
-                                         technicalAnalysis.data.pSar, technicalAnalysis.data.twoHundredEMA);
+        int signal = strategy.simpleHeikinAshiPsarEMA(technicalAnalysis.data.openHa, technicalAnalysis.data.closeHa,
+                                                      technicalAnalysis.data.highHa, technicalAnalysis.data.lowHa,
+                                                      technicalAnalysis.data.pSar, technicalAnalysis.data.twoHundredEMA);
+
+        //if the heikin-ashi + psar + ema algo signals long position, use psar as stop loss and set rr to 2
+        if (signal == 1)
+        {
+            Order order;
+            order.symbol = pair;
+            order.type = "LIMIT";
+            order.side = "BUY";
+            getTime(order.timestamp);
+            order.quantity = 0.1;
+            order.price = 53600.0;
+            bot.newOrder(order);
+        }
 
         /*for (int i = 0; i < technicalAnalysis.data.pSar.size(); i++)
         {
@@ -258,15 +309,8 @@ int main(int argc, char *argv[])
 {
     benchmarkPerformance([]() -> void {
         init();
-        /*Order order;
-        order.symbol = "BTCUSDT";
-        order.type = "LIMIT";
-        order.side = "BUY";
-        getTime(order.timestamp);
-        order.quantity = 0.1;
-        order.price = 53600.0;
-        bot.newOrder(order);*/
         execOnSinglePair("BTCUSDT");
+        bot.getAllOrders("BTCUSDT");
     });
 
     return 0;

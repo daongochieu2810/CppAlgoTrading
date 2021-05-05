@@ -35,7 +35,6 @@ class BotData
     std::vector<long double> open, high, low, close, volume, quoteAssetVolume, takerBuyAssetVol, takerBuyQuoteAssetVol, Ignore;
     bool algoCheck, algoBuy;
     std::string pair;
-    std::string signature;
     std::string secretKey;
     std::string apiKey;
 
@@ -44,6 +43,7 @@ public:
     void setPair();
     void setPrice(double foundPrice);
     void setSellPercent();
+    void getAllOrders(std::string);
     void getPriceAction(std::string const &, std::string const &, long startTime = -1, long endTime = -1,
                         int limit = 500, void (*)(HistoricalData &) = NULL);
     void checkConnectivity();
@@ -51,7 +51,7 @@ public:
     void getOrderBook(std::string, int limit = 100);
     void getPrice(const std::string);
     void formatPrice(json::value const &);
-    void HMACsha256(std::string const &, std::string const &);
+    void HMACsha256(std::string const &, std::string const &, std::string &);
     void newOrder(Order const &);
     void checkBuy();
     void checkSell();

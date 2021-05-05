@@ -4,7 +4,8 @@
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>
 #include <string>
-#include <unordered_map>
+#include <vector>
+#include <utility>
 
 using namespace utility;
 using namespace web;
@@ -19,9 +20,9 @@ public:
     ApiService(std::string);
     void setApiKey(std::string);
     pplx::task<http_response> request(method, std::string,
-                                      std::unordered_map<std::string, std::string> &,
+                                      std::vector<std::pair<std::string, std::string>> &,
                                       bool isSaveAsJson = false, std::string fileName = "");
-    void getQueryString(std::unordered_map<std::string, std::string> &, std::string &);
+    void getQueryString(std::vector<std::pair<std::string, std::string>> &, std::string &);
 };
 
 #endif

@@ -11,7 +11,7 @@ void ApiService::setApiKey(std::string _apiKey)
     apiKey = _apiKey;
 }
 
-void ApiService::getQueryString(std::unordered_map<std::string, std::string> &params, std::string &copy)
+void ApiService::getQueryString(std::vector<std::pair<std::string, std::string>> &params, std::string &copy)
 {
     uri_builder builder;
 
@@ -25,7 +25,7 @@ void ApiService::getQueryString(std::unordered_map<std::string, std::string> &pa
 
 pplx::task<http_response> ApiService::request(method _method,
                                               std::string url,
-                                              std::unordered_map<std::string, std::string> &params,
+                                              std::vector<std::pair<std::string, std::string>> &params,
                                               bool isSaveAsJson,
                                               std::string fileName)
 {
