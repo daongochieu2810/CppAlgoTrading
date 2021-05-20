@@ -1440,11 +1440,11 @@ void IbkrClient::error(int id, int errorCode, const std::string &errorString)
 {
     if (errorCode >= 2100 && errorCode <= 2137)
     {
-        printf("Warning. Code: %d, Msg: %s\n", errorCode, errorString.c_str());
+        std::cerr << "Warning. Code: " << errorCode << ", Msg : " << errorString << std::endl;
     }
     else
     {
-        printf("Error. Id: %d, Code: %d, Msg: %s\n", id, errorCode, errorString.c_str());
+        std::cerr << "Error. Id: " << id << ", Code: " << errorCode << ", Msg: " << errorString << std::endl;
     }
 }
 //! [error]
