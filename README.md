@@ -1,5 +1,6 @@
 # Notes:
 
+- [Dev guide](https://github.com/daongochieu2810/CppAlgoTrading/blob/master/DEVGUIDE.md)
 - API sources: Binance (Spot + Futures + Testnet), IBKR
 - Libraries used: cpprestsdk, boost, stl, gperftools
 - Technical indicators used: EMA, SMA, RSI, Bollinger Bands, Parabolic SAR
