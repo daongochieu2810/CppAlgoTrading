@@ -1,5 +1,5 @@
-.vscode
-*.txt
-*.exe
+**/.vscode
+**/*.txt
+**/*.exe
 
 twsapi/IBJts/builds/*.o

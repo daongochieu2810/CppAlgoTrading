@@ -14,3 +14,5 @@ binance_prof:
 	g++ -std=c++11 $(INCLUDES) ${GPERFTOOLS} $(Helpers) Binance.cpp $(TWS) -o Binance.exe $(CFLAGS) -Wl,--no-as-needed -lprofiler -ltcmalloc -Wl,--as-needed
 ibkr_prof:
 	g++ -std=c++11 $(INCLUDES) ${GPERFTOOLS} $(Helpers) IbkrClient.cpp Ibkr.cpp $(TWS) -o Ibkr.exe $(CFLAGS) -Wl,--no-as-needed -lprofiler -ltcmalloc -Wl,--as-needed
+clean:
+	rm -rf *.exe twsapi/IBJts/builds/*.o
