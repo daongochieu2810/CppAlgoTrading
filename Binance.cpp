@@ -283,6 +283,9 @@ void run()
     bot.getAllTradingPairs(
         [](std::vector<std::string> &tradingPairs) -> void
         {
+            double minPrice = 2.0, maxPrice = 13.0, minDollarVol = 500000, minChangePercent = 3.5;
+            filterTradingPairs(tradingPairs, minPrice, maxPrice, minDollarVol, minChangePercent);
+
             for (int i = 0; i < tradingPairs.size(); i++)
             {
                 std::cout << tradingPairs[i] << std::endl;
