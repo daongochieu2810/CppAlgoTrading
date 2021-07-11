@@ -12,7 +12,7 @@
 #include "TestCppClient.h"
 
 const unsigned MAX_ATTEMPTS = 5;
-const unsigned SLEEP_TIME = 10;
+const unsigned SLEEP_TIME = 5;
 
 /* IMPORTANT: always use your paper trading account. The code below will submit orders as part of the demonstration. */
 /* IB will not be responsible for accidental executions on your live account. */
@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 	const char *host = argc > 1 ? argv[1] : "";
 	int port = argc > 2 ? atoi(argv[2]) : 0;
 	if (port <= 0)
-		port = 7496;
+		port = 7497;
 	const char *connectOptions = argc > 3 ? argv[3] : "";
 	int clientId = 0;
 

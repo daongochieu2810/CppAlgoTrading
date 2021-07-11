@@ -19,7 +19,7 @@ int main()
         {
             printf("Waiting for next iteration...\n");
             client.processMessages();
-            client.m_state = ST_PNL;
+            //client.m_state = ST_PNL;
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }

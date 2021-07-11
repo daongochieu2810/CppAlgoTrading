@@ -130,11 +130,36 @@ void BotData::getOrderBook(std::string symbol, int limit)
     apiService.request(methods::GET, "/depth", params, true, "order_book_info.json");
 }
 
-// Do not run this frequently in prod, as it retrieves ALL exchange pairs
-void BotData::getExchangeInfo()
+void BotData::getAllTradingPairs(void callback(std::vector<std::string> &))
 {
     std::vector<std::pair<std::string, std::string>> params;
-    apiService.request(methods::GET, "/exchangeInfo", params, true, "exchange_info.json");
+    apiService.request(methods::GET, "/exchangeInfo", params)
+        .then([&](http_response response)
+              {
+                  response.extract_json()
+                      .then([&](json::value jsonData)
+                            {
+                                std::vector<std::string> tradingPairs;
+                                web::json::array symbols = jsonData.at("symbols").as_array();
+                                for (int i = 0; i < symbols.size(); i++)
+                                {
+                                    std::string pair = symbols[i].at("symbol").as_string();
+                                    std::string status = symbols[i].at("status").as_string();
+
+                                    if (status.compare("TRADING") == 0)
+                                    {
+                                        tradingPairs.push_back(pair);
+                                    }
+                                }
+
+                                if (callback != NULL)
+                                {
+                                    callback(tradingPairs);
+                                }
+                            })
+                      .wait();
+              })
+        .wait();
 }
 
 void BotData::setUpKeys()
@@ -316,12 +341,22 @@ void execOnSinglePair(const std::string &pair)
 
 int main(int argc, char *argv[])
 {
-    benchmarkPerformance([]() -> void
-                         {
-                             init();
-                             execOnSinglePair("BTCUSDT");
-                             bot.getAllOrders("BTCUSDT");
-                         });
+    benchmarkPerformance(
+        []() -> void
+        {
+            init();
+            //execOnSinglePair("BTCUSDT");
+            //bot.getAllOrders("BTCUSDT");
+            std::vector<std::string> tradingPairs;
+            bot.getAllTradingPairs(
+                [](std::vector<std::string> &tradingPairs) -> void
+                {
+                    for (int i = 0; i < tradingPairs.size(); i++)
+                    {
+                        std::cout << tradingPairs[i] << std::endl;
+                    }
+                });
+        });
 
     return 0;
 }

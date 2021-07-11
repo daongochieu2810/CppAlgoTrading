@@ -47,7 +47,7 @@ public:
     void getPriceAction(std::string const &, std::string const &, long startTime = -1, long endTime = -1,
                         int limit = 500, void (*)(HistoricalData &) = NULL);
     void checkConnectivity();
-    void getExchangeInfo();
+    void getAllTradingPairs(void (*)(std::vector<std::string> &) = NULL);
     void getOrderBook(std::string, int limit = 100);
     void getPrice(const std::string);
     void formatPrice(json::value const &);
