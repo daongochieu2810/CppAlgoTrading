@@ -71,10 +71,10 @@ void BotData::getPriceAction(std::string const &symbol, std::string const &inter
     params.push_back(std::make_pair("limit", std::to_string(limit)));
 
     apiService.request(methods::GET, "/klines", params)
-        .then([=](http_response response)
+        .then([&](http_response response)
               {
                   response.extract_json()
-                      .then([=](json::value jsonData)
+                      .then([&](json::value jsonData)
                             {
                                 HistoricalData candlestick;
                                 for (int i = 0; i < limit; i++)
@@ -87,6 +87,7 @@ void BotData::getPriceAction(std::string const &symbol, std::string const &inter
                                     candlestick.volume.push_back(std::stod(jsonData[i][5].as_string()));
                                     candlestick.closeTime.push_back(jsonData[i][6].as_number().to_uint64());
                                 }
+
                                 if (callback != NULL)
                                 {
                                     callback(candlestick);
@@ -191,7 +192,7 @@ void BotData::checkConnectivity()
 {
     std::vector<std::pair<std::string, std::string>> params;
     apiService.request(methods::GET, "/ping", params)
-        .then([=](http_response response)
+        .then([&](http_response response)
               { printf("Received response status code:%u\n", response.status_code()); })
         .wait();
 }
@@ -236,31 +237,6 @@ void printHistoricalData()
     std::cout << std::endl;
 }
 
-void benchmarkPerformance(void fnc())
-{
-    auto t1 = high_resolution_clock::now();
-    fnc();
-    auto t2 = high_resolution_clock::now();
-    duration<double, std::milli> ms_double = t2 - t1;
-    std::cout << ms_double.count() << "ms\n";
-}
-
-inline auto binary_to_hex_digit(unsigned a) -> char
-{
-    return a + (a < 10 ? '0' : 'a' - 10);
-}
-
-auto binary_to_hex(unsigned char const *binary, unsigned binary_len) -> std::string
-{
-    std::string r(binary_len * 2, '\0');
-    for (unsigned i = 0; i < binary_len; ++i)
-    {
-        r[i * 2] = binary_to_hex_digit(binary[i] >> 4);
-        r[i * 2 + 1] = binary_to_hex_digit(binary[i] & 15);
-    }
-    return r;
-}
-
 void BotData::HMACsha256(std::string const &message, std::string const &key, std::string &signature)
 {
     unsigned char result[EVP_MAX_MD_SIZE];
@@ -268,6 +244,50 @@ void BotData::HMACsha256(std::string const &message, std::string const &key, std
     HMAC(EVP_sha256(), key.data(), key.size(),
          reinterpret_cast<unsigned char const *>(message.data()), message.size(), result, &result_len);
     signature = binary_to_hex(result, result_len);
+}
+
+void filterTradingPairs(std::vector<std::string> &tradingPairs, double minPrice,
+                        double maxPrice, double minDollarVol, double minChangePercent)
+{
+    for (int i = 0; i < tradingPairs.size(); i++)
+    {
+        std::string currPair = tradingPairs[i];
+        std::vector<std::pair<std::string, std::string>> params;
+        params.push_back(std::make_pair("symbol", currPair));
+        params.push_back(std::make_pair("limit", "1"));
+
+        //capture by refs for local scope's params
+        apiService.request(methods::GET, "/ticker/24hr", params)
+            .then([&tradingPairs, &i, &minPrice, &maxPrice, &minDollarVol, &minChangePercent](http_response response)
+                  {
+                      response.extract_json()
+                          .then([&](json::value jsonData)
+                                {
+                                    double latestPrice = std::stod(jsonData.at("lastPrice").as_string());
+                                    double volume = std::stod(jsonData.at("volume").as_string());
+                                    double priceChangePercent = std::stod(jsonData.at("priceChangePercent").as_string());
+
+                                    if (!(latestPrice >= minPrice && latestPrice <= maxPrice && latestPrice * volume >= minDollarVol && priceChangePercent >= minChangePercent))
+                                    {
+                                        tradingPairs.erase(tradingPairs.begin() + i);
+                                    }
+                                })
+                          .wait();
+                  })
+            .wait();
+    }
+}
+
+void run()
+{
+    bot.getAllTradingPairs(
+        [](std::vector<std::string> &tradingPairs) -> void
+        {
+            for (int i = 0; i < tradingPairs.size(); i++)
+            {
+                std::cout << tradingPairs[i] << std::endl;
+            }
+        });
 }
 
 void execOnSinglePair(const std::string &pair)
@@ -293,9 +313,10 @@ void execOnSinglePair(const std::string &pair)
         t3.join();
         t4.join();
 
-        int signal = strategy.simpleHeikinAshiPsarEMA(technicalAnalysis.data.openHa, technicalAnalysis.data.closeHa,
-                                                      technicalAnalysis.data.highHa, technicalAnalysis.data.lowHa,
-                                                      technicalAnalysis.data.pSar, technicalAnalysis.data.twoHundredEMA);
+        int signal = strategy.simpleHeikinAshiPsarEMA(
+            technicalAnalysis.data.openHa, technicalAnalysis.data.closeHa,
+            technicalAnalysis.data.highHa, technicalAnalysis.data.lowHa,
+            technicalAnalysis.data.pSar, technicalAnalysis.data.twoHundredEMA);
 
         //std::cout << signal << std::endl;
 
@@ -345,17 +366,7 @@ int main(int argc, char *argv[])
         []() -> void
         {
             init();
-            //execOnSinglePair("BTCUSDT");
-            //bot.getAllOrders("BTCUSDT");
-            std::vector<std::string> tradingPairs;
-            bot.getAllTradingPairs(
-                [](std::vector<std::string> &tradingPairs) -> void
-                {
-                    for (int i = 0; i < tradingPairs.size(); i++)
-                    {
-                        std::cout << tradingPairs[i] << std::endl;
-                    }
-                });
+            run();
         });
 
     return 0;

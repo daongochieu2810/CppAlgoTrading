@@ -16,7 +16,6 @@
 #include <iomanip>
 #include <vector>
 #include <boost/algorithm/string.hpp>
-#include <stdlib.h>
 
 #include "TechnicalAnalysis.h"
 #include "Strategy.h"
@@ -26,7 +25,6 @@ using namespace web;
 using namespace web::http;
 using namespace web::http::client;
 using namespace concurrency::streams;
-using namespace std::chrono;
 
 class BotData
 {
