@@ -131,7 +131,7 @@ void BotData::getOrderBook(std::string symbol, int limit)
     apiService.request(methods::GET, "/depth", params, true, "order_book_info.json");
 }
 
-void BotData::getAllTradingPairs(void callback(std::vector<std::string> &))
+void BotData::getAllTradingPairs(void callback(std::list<std::string> &))
 {
     std::vector<std::pair<std::string, std::string>> params;
     apiService.request(methods::GET, "/exchangeInfo", params)
@@ -140,7 +140,7 @@ void BotData::getAllTradingPairs(void callback(std::vector<std::string> &))
                   response.extract_json()
                       .then([&](json::value jsonData)
                             {
-                                std::vector<std::string> tradingPairs;
+                                std::list<std::string> tradingPairs;
                                 web::json::array symbols = jsonData.at("symbols").as_array();
                                 for (int i = 0; i < symbols.size(); i++)
                                 {
@@ -246,31 +246,41 @@ void BotData::HMACsha256(std::string const &message, std::string const &key, std
     signature = binary_to_hex(result, result_len);
 }
 
-void filterTradingPairs(std::vector<std::string> &tradingPairs, double minPrice,
+void filterTradingPairs(std::list<std::string> &tradingPairs, double minPrice,
                         double maxPrice, double minDollarVol, double minChangePercent)
 {
-    for (int i = 0; i < tradingPairs.size(); i++)
+    std::list<std::string>::iterator it;
+    std::list<std::string> validPairs;
+    for (it = tradingPairs.begin(); it != tradingPairs.end(); ++it)
     {
-        std::string currPair = tradingPairs[i];
+        std::string currPair = *it;
         std::vector<std::pair<std::string, std::string>> params;
         params.push_back(std::make_pair("symbol", currPair));
-        params.push_back(std::make_pair("limit", "1"));
 
         //capture by refs for local scope's params
         apiService.request(methods::GET, "/ticker/24hr", params)
-            .then([&tradingPairs, &i, &minPrice, &maxPrice, &minDollarVol, &minChangePercent](http_response response)
+            .then([&tradingPairs, &validPairs, &it, &minPrice, &maxPrice, &minDollarVol, &minChangePercent](http_response response)
                   {
                       response.extract_json()
                           .then([&](json::value jsonData)
                                 {
-                                    double latestPrice = std::stod(jsonData.at("lastPrice").as_string());
-                                    double volume = std::stod(jsonData.at("volume").as_string());
-                                    double priceChangePercent = std::stod(jsonData.at("priceChangePercent").as_string());
-
-                                    if (!(latestPrice >= minPrice && latestPrice <= maxPrice && latestPrice * volume >= minDollarVol && priceChangePercent >= minChangePercent))
+                                    try
                                     {
-                                        tradingPairs.erase(tradingPairs.begin() + i);
+                                        double latestPrice = std::stod(jsonData.at("lastPrice").as_string());
+                                        double volume = std::stod(jsonData.at("volume").as_string());
+                                        double priceChangePercent = std::stod(jsonData.at("priceChangePercent").as_string());
+
+                                        if (latestPrice >= minPrice && latestPrice <= maxPrice && latestPrice * volume >= minDollarVol && priceChangePercent >= minChangePercent)
+                                        {
+                                            validPairs.push_back(*it);
+                                        }
                                     }
+                                    catch (web::json::json_exception e)
+                                    {
+                                        printf("%s\n", e.what());
+                                    }
+
+                                    tradingPairs = validPairs;
                                 })
                           .wait();
                   })
@@ -281,14 +291,15 @@ void filterTradingPairs(std::vector<std::string> &tradingPairs, double minPrice,
 void run()
 {
     bot.getAllTradingPairs(
-        [](std::vector<std::string> &tradingPairs) -> void
+        [](std::list<std::string> &tradingPairs) -> void
         {
             double minPrice = 2.0, maxPrice = 13.0, minDollarVol = 500000, minChangePercent = 3.5;
             filterTradingPairs(tradingPairs, minPrice, maxPrice, minDollarVol, minChangePercent);
 
-            for (int i = 0; i < tradingPairs.size(); i++)
+            std::list<std::string>::iterator it;
+            for (it = tradingPairs.begin(); it != tradingPairs.end(); ++it)
             {
-                std::cout << tradingPairs[i] << std::endl;
+                std::cout << *it << std::endl;
             }
         });
 }
