@@ -1,5 +1,10 @@
 #include "Strategy.h"
 
+double Strategy::findStop(const double currentPrice, HistoricalData &data, int nowInMillis)
+{
+    return 0.0;
+}
+
 int Strategy::simpleHeikinAshiPsarEMA(const std::vector<double> &openHa,
                                       const std::vector<double> &closeHa,
                                       const std::vector<double> &highHa,

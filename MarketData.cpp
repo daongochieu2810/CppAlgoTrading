@@ -1,7 +1,6 @@
 #include "MarketData.h"
 
 //std::mutex _mtx;
-
 void HistoricalData::accessClose(boost::optional<std::vector<double> &> copy)
 {
     //TODO: add thread-safe access here

@@ -14,6 +14,7 @@
 #include <string>
 #include <stdio.h>
 #include <iomanip>
+#include <functional>
 #include <vector>
 #include <boost/algorithm/string.hpp>
 
@@ -42,10 +43,11 @@ public:
     void setPrice(double foundPrice);
     void setSellPercent();
     void getAllOrders(std::string);
+
     void getPriceAction(std::string const &, std::string const &, long startTime = -1, long endTime = -1,
-                        int limit = 500, void (*)(HistoricalData &) = NULL);
+                        int limit = 500, std::function<void(HistoricalData &)> = NULL);
     void checkConnectivity();
-    void getAllTradingPairs(void (*)(std::list<std::string> &) = NULL);
+    void getAllTradingPairs(void (*f)(std::list<std::string> &) = NULL);
     void getOrderBook(std::string, int limit = 100);
     void getPrice(const std::string);
     void formatPrice(json::value const &);

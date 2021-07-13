@@ -3,7 +3,6 @@
 #include "Utils.h"
 
 ApiService apiService(binanceSpotTestnet);
-TechnicalAnalysis technicalAnalysis;
 Strategy strategy;
 
 void BotData::newOco(const std::vector<Order> &orders)
@@ -52,7 +51,7 @@ void BotData::newOrder(Order const &order)
 }
 
 void BotData::getPriceAction(std::string const &symbol, std::string const &interval, long startTime, long endTime,
-                             int limit, void callback(HistoricalData &))
+                             int limit, std::function<void(HistoricalData &)> callback)
 {
     std::vector<std::pair<std::string, std::string>> params;
     params.push_back(std::make_pair("symbol", symbol));
@@ -131,7 +130,7 @@ void BotData::getOrderBook(std::string symbol, int limit)
     apiService.request(methods::GET, "/depth", params, true, "order_book_info.json");
 }
 
-void BotData::getAllTradingPairs(void callback(std::list<std::string> &))
+void BotData::getAllTradingPairs(void (*callback)(std::list<std::string> &))
 {
     std::vector<std::pair<std::string, std::string>> params;
     apiService.request(methods::GET, "/exchangeInfo", params)
@@ -202,7 +201,7 @@ void init()
     bot.setUpKeys();
 }
 
-void printHistoricalData()
+void printHistoricalData(const TechnicalAnalysis &technicalAnalysis)
 {
     for (double openPrice : technicalAnalysis.data.open)
     {
@@ -246,6 +245,8 @@ void BotData::HMACsha256(std::string const &message, std::string const &key, std
     signature = binary_to_hex(result, result_len);
 }
 
+// this is used for the momentum algo
+// for now it is placed here because this might be useful for other algos
 void filterTradingPairs(std::list<std::string> &tradingPairs, double minPrice,
                         double maxPrice, double minDollarVol, double minChangePercent)
 {
@@ -270,6 +271,7 @@ void filterTradingPairs(std::list<std::string> &tradingPairs, double minPrice,
                                         double volume = std::stod(jsonData.at("volume").as_string());
                                         double priceChangePercent = std::stod(jsonData.at("priceChangePercent").as_string());
 
+                                        // these conditions are mentioned in DEVGUIDE.MD
                                         if (latestPrice >= minPrice && latestPrice <= maxPrice && latestPrice * volume >= minDollarVol && priceChangePercent >= minChangePercent)
                                         {
                                             validPairs.push_back(*it);
@@ -279,69 +281,41 @@ void filterTradingPairs(std::list<std::string> &tradingPairs, double minPrice,
                                     {
                                         printf("%s\n", e.what());
                                     }
-
-                                    tradingPairs = validPairs;
                                 })
                           .wait();
                   })
             .wait();
     }
+
+    tradingPairs = validPairs;
 }
 
-void run()
+void execOnSinglePair(std::string pair)
 {
-    bot.getAllTradingPairs(
-        [](std::list<std::string> &tradingPairs) -> void
-        {
-            double minPrice = 2.0, maxPrice = 13.0, minDollarVol = 500000, minChangePercent = 3.5;
-            filterTradingPairs(tradingPairs, minPrice, maxPrice, minDollarVol, minChangePercent);
-
-            std::list<std::string>::iterator it;
-            for (it = tradingPairs.begin(); it != tradingPairs.end(); ++it)
-            {
-                std::cout << *it << std::endl;
-            }
-        });
-}
-
-void execOnSinglePair(const std::string &pair)
-{
+    TechnicalAnalysis technicalAnalysis;
     bot.getPriceAction(
-        pair, "5m", -1, -1, 250, [](HistoricalData &x) -> void
+        pair, "1m", -1, -1, 1000, [&technicalAnalysis](HistoricalData &x) -> void
         { technicalAnalysis.setData(x); });
     while (1)
     {
         //thread t1 is used to prepare data for next time frame
-        std::thread t1(&BotData::getPriceAction, bot, pair, "5m", -1, -1, 250,
-                       [](HistoricalData &x) -> void
+        std::thread t1(&BotData::getPriceAction, bot, pair, "1m", -1, -1, 1000,
+                       [&technicalAnalysis](HistoricalData &x) -> void
                        {
                            technicalAnalysis.setTempData(x);
                        });
 
         //other threads produce technical indicators
         std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.twoHundredEMA));
-        std::thread t3(&TechnicalAnalysis::calcPSAR, technicalAnalysis, std::ref(technicalAnalysis.data.pSar));
+        //PSAR CALCULATION HAS BUGS -> INVESTIGATE
+        //std::thread t3(&TechnicalAnalysis::calcPSAR, technicalAnalysis, std::ref(technicalAnalysis.data.pSar));
         std::thread t4(&TechnicalAnalysis::setUpHeikinAshi, technicalAnalysis, std::ref(technicalAnalysis.data));
 
         t2.join();
-        t3.join();
+        //t3.join();
         t4.join();
 
-        int signal = strategy.simpleHeikinAshiPsarEMA(
-            technicalAnalysis.data.openHa, technicalAnalysis.data.closeHa,
-            technicalAnalysis.data.highHa, technicalAnalysis.data.lowHa,
-            technicalAnalysis.data.pSar, technicalAnalysis.data.twoHundredEMA);
-
-        //std::cout << signal << std::endl;
-
-        //if the heikin-ashi + psar + ema algo signals long position, use psar as stop loss and set rr to 2
-        //if (signal == 1)
-        //{
-        int currentIndex = technicalAnalysis.data.pSar.size() - 1;
-        const double risk = technicalAnalysis.data.close[currentIndex] - technicalAnalysis.data.pSar[currentIndex];
-        const double reward = risk * 2;
-
-        Order order1;
+        /*Order order1;
         order1.symbol = "BTCUSDT";
         order1.type = "MARKET";
         order1.side = "BUY";
@@ -349,7 +323,7 @@ void execOnSinglePair(const std::string &pair)
         order1.quantity = 0.001;
         order1.price = -1;
         order1.stopPrice = -1;
-        bot.newOrder(order1);
+        bot.newOrder(order1);*/
         //sleep(600);
         //}
 
@@ -364,7 +338,7 @@ void execOnSinglePair(const std::string &pair)
         t1.join();
         technicalAnalysis.setData(technicalAnalysis.tempData);
 
-        bot.getAllOrders("BTCUSDT");
+        //bot.getAllOrders("BTCUSDT");
 
         //printHistoricalData();
 
@@ -372,6 +346,39 @@ void execOnSinglePair(const std::string &pair)
         //sleep(300);
         break;
     }
+}
+
+void run()
+{
+    bot.getAllTradingPairs(
+        [](std::list<std::string> &tradingPairs) -> void
+        {
+            double minPrice = 2.0, maxPrice = 1000000.0, minDollarVol = 5000, minChangePercent = 0.5;
+
+            // Step 1: only get trading pairs that satisfies the conditions mentioned in DEVGUIDE
+            filterTradingPairs(tradingPairs, minPrice, maxPrice, minDollarVol, minChangePercent);
+
+            // std::list<std::string>::iterator it;
+            // for (it = tradingPairs.begin(); it != tradingPairs.end(); ++it)
+            // {
+            //     std::cout << *it << std::endl;
+            // }
+
+            // Step 2: process each pair with a dedicated thread
+            std::list<std::string>::iterator it;
+            std::thread allThreads[tradingPairs.size()];
+            int index = 0;
+
+            for (it = tradingPairs.begin(); it != tradingPairs.end(); ++it)
+            {
+                allThreads[index++] = std::thread(execOnSinglePair, *it);
+            }
+
+            for (int i = 0; i < tradingPairs.size(); i++)
+            {
+                allThreads[i].join();
+            }
+        });
 }
 
 int main(int argc, char *argv[])
