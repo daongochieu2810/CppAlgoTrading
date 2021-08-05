@@ -306,14 +306,14 @@ void execOnSinglePair(std::string pair)
                        });
 
         //other threads produce technical indicators
-        std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.twoHundredEMA));
+        //std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.twoHundredEMA));
         //PSAR CALCULATION HAS BUGS -> INVESTIGATE
         //std::thread t3(&TechnicalAnalysis::calcPSAR, technicalAnalysis, std::ref(technicalAnalysis.data.pSar));
-        std::thread t4(&TechnicalAnalysis::setUpHeikinAshi, technicalAnalysis, std::ref(technicalAnalysis.data));
+        //std::thread t4(&TechnicalAnalysis::setUpHeikinAshi, technicalAnalysis, std::ref(technicalAnalysis.data));
 
-        t2.join();
+        //t2.join();
         //t3.join();
-        t4.join();
+        //t4.join();
 
         /*Order order1;
         order1.symbol = "BTCUSDT";
@@ -340,7 +340,7 @@ void execOnSinglePair(std::string pair)
 
         //bot.getAllOrders("BTCUSDT");
 
-        //printHistoricalData();
+        printHistoricalData(technicalAnalysis);
 
         //wait for 5 mins
         //sleep(300);
