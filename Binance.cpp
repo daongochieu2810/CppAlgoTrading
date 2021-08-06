@@ -50,6 +50,19 @@ void BotData::newOrder(Order const &order)
         .wait();
 }
 
+void BotData::getCurrentAveragePrice(std::string const &symbol, double &price)
+{
+    std::vector<std::pair<std::string, std::string>> params;
+    params.push_back(std::make_pair("symbol", symbol));
+    apiService.request(methods::GET, "/ticker/price", params)
+        .then([&](http_response response)
+              { response.extract_json()
+                    .then([&](json::value jsonData)
+                          { price = std::stod(jsonData.at("price").as_string()); })
+                    .wait(); })
+        .wait();
+}
+
 void BotData::getPriceAction(std::string const &symbol, std::string const &interval, long startTime, long endTime,
                              int limit, std::function<void(HistoricalData &)> callback)
 {
@@ -304,6 +317,7 @@ void execOnSinglePair(std::string pair)
                        {
                            technicalAnalysis.setTempData(x);
                        });
+        strategy.momentumAlgo(0.0, technicalAnalysis.data);
 
         t1.join();
         technicalAnalysis.setData(technicalAnalysis.tempData);
@@ -355,7 +369,10 @@ int main(int argc, char *argv[])
         []() -> void
         {
             init();
-            run();
+            double y;
+            bot.getCurrentAveragePrice("LTCBTC", y);
+            std::cout << y << std::endl;
+            //run();
         });
 
     return 0;

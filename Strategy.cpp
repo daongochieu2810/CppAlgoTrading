@@ -2,7 +2,7 @@
 
 const double DEFAULT_STOP = 0.95;
 
-double Strategy::findStop(const double currentPrice, HistoricalData &data, int nowInMillis)
+double Strategy::findStop(const double currentPrice, HistoricalData &data)
 {
     std::vector<double> lowPrices;
     data.accessLow(lowPrices);
@@ -38,6 +38,11 @@ double Strategy::findStop(const double currentPrice, HistoricalData &data, int n
     }
 
     return *reSampledLow.end() - 0.01;
+}
+
+bool Strategy::momentumAlgo(const double currentPrice, HistoricalData &data)
+{
+    return false;
 }
 
 int Strategy::simpleHeikinAshiPsarEMA(const std::vector<double> &openHa,

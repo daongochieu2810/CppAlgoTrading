@@ -49,7 +49,7 @@ public:
     void checkConnectivity();
     void getAllTradingPairs(void (*f)(std::list<std::string> &) = NULL);
     void getOrderBook(std::string, int limit = 100);
-    void getPrice(const std::string);
+    void getCurrentAveragePrice(std::string const &, double &);
     void formatPrice(json::value const &);
     void HMACsha256(std::string const &, std::string const &, std::string &);
     void newOrder(Order const &);
