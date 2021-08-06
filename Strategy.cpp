@@ -1,8 +1,43 @@
 #include "Strategy.h"
 
+const double DEFAULT_STOP = 0.95;
+
 double Strategy::findStop(const double currentPrice, HistoricalData &data, int nowInMillis)
 {
-    return 0.0;
+    std::vector<double> lowPrices;
+    data.accessLow(lowPrices);
+    auto lowIterator = lowPrices.size() > 100 ? lowPrices.begin() + 100 : lowPrices.begin();
+
+    std::vector<double> reSampledLow;
+    std::vector<double> tempSample;
+    std::vector<double> diff;
+    int index = 0;
+
+    for (auto i = lowIterator; i != lowPrices.end(); i++)
+    {
+        tempSample.push_back(*i);
+        index++;
+        if (index % 5 == 0)
+        {
+            reSampledLow.push_back(*std::min_element(tempSample.begin(), tempSample.end()));
+            tempSample.clear();
+        }
+    }
+
+    for (int i = 1; i < reSampledLow.size(); i++)
+    {
+        diff.push_back(reSampledLow[i] - reSampledLow[i - 1]);
+    }
+
+    for (int i = 0; i < diff.size(); i++)
+    {
+        if (diff[i] < 0)
+        {
+            return currentPrice * DEFAULT_STOP;
+        }
+    }
+
+    return *reSampledLow.end() - 0.01;
 }
 
 int Strategy::simpleHeikinAshiPsarEMA(const std::vector<double> &openHa,

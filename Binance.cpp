@@ -305,40 +305,8 @@ void execOnSinglePair(std::string pair)
                            technicalAnalysis.setTempData(x);
                        });
 
-        //other threads produce technical indicators
-        //std::thread t2(&TechnicalAnalysis::calcEMA, technicalAnalysis, 200, std::ref(technicalAnalysis.data.twoHundredEMA));
-        //PSAR CALCULATION HAS BUGS -> INVESTIGATE
-        //std::thread t3(&TechnicalAnalysis::calcPSAR, technicalAnalysis, std::ref(technicalAnalysis.data.pSar));
-        //std::thread t4(&TechnicalAnalysis::setUpHeikinAshi, technicalAnalysis, std::ref(technicalAnalysis.data));
-
-        //t2.join();
-        //t3.join();
-        //t4.join();
-
-        /*Order order1;
-        order1.symbol = "BTCUSDT";
-        order1.type = "MARKET";
-        order1.side = "BUY";
-        getTime(order1.timestamp);
-        order1.quantity = 0.001;
-        order1.price = -1;
-        order1.stopPrice = -1;
-        bot.newOrder(order1);*/
-        //sleep(600);
-        //}
-
-        /*for (int i = 0; i < technicalAnalysis.data.pSar.size(); i++)
-        {
-            double psarValue = technicalAnalysis.data.pSar[i];
-            double high = technicalAnalysis.data.high[i];
-            double low = technicalAnalysis.data.low[i];
-            std::cout << std::setprecision(10) << psarValue << " " << high << " " << low << std::endl;
-        }*/
-
         t1.join();
         technicalAnalysis.setData(technicalAnalysis.tempData);
-
-        //bot.getAllOrders("BTCUSDT");
 
         printHistoricalData(technicalAnalysis);
 
