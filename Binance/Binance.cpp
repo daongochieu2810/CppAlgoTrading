@@ -317,7 +317,6 @@ void execOnSinglePair(std::string pair)
                        {
                            technicalAnalysis.setTempData(x);
                        });
-        strategy.momentumAlgo(0.0, technicalAnalysis.data);
 
         t1.join();
         technicalAnalysis.setData(technicalAnalysis.tempData);

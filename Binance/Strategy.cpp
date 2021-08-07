@@ -40,11 +40,6 @@ double Strategy::findStop(const double currentPrice, HistoricalData &data)
     return *reSampledLow.end() - 0.01;
 }
 
-bool Strategy::momentumAlgo(const double currentPrice, HistoricalData &data)
-{
-    return false;
-}
-
 int Strategy::simpleHeikinAshiPsarEMA(const std::vector<double> &openHa,
                                       const std::vector<double> &closeHa,
                                       const std::vector<double> &highHa,

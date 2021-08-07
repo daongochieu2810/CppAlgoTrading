@@ -14,7 +14,6 @@ public:
                                 const std::vector<double> &, const std::vector<double> &,
                                 const std::vector<double> &);
     double findStop(const double, HistoricalData &);
-    bool momentumAlgo(const double, HistoricalData &);
 };
 
 #endif
