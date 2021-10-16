@@ -5,13 +5,10 @@
 #include <chrono>
 #include <thread>
 
-#include "StdAfx.h"
 #include "Ibkr.h"
-#include "Strategy.h"
 
 int main()
 {
-    Strategy strategy;
     IbkrClient client;
     if (client.connect(LOCAL_HOST, DEFAULT_PORT, 0))
     {

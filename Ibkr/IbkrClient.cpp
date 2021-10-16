@@ -27,7 +27,7 @@
 #include "FAMethodSamples.h"
 #include "CommonDefs.h"
 #include "AccountSummaryTags.h"
-#include "twsapi/IBJts/samples/Cpp/TestCppClient/Utils.h"
+#include "Utils.h"
 
 #include <stdio.h>
 #include <chrono>
