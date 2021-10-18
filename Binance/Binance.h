@@ -17,9 +17,10 @@
 #include <functional>
 #include <vector>
 #include <boost/algorithm/string.hpp>
+#include <boost/optional.hpp>
 
 #include "TechnicalAnalysis.h"
-#include "Strategy.h"
+#include "strategies/Strategy.h"
 
 using namespace utility;
 using namespace web;
@@ -30,6 +31,7 @@ using namespace concurrency::streams;
 class BotData
 {
     double price, pastPrice, sellPercent, RSI;
+    std::vector<Order> globalOrders;
     std::vector<long> openTime, closeTime, numTrades;
     std::vector<long double> open, high, low, close, volume, quoteAssetVolume, takerBuyAssetVol, takerBuyQuoteAssetVol, Ignore;
     bool algoCheck, algoBuy;
@@ -56,6 +58,8 @@ public:
     void newOco(const std::vector<Order> &);
     void checkBuy();
     void checkSell();
+    void accessOrders(boost::optional<std::vector<Order> &>);
+    void modifyOrders(boost::optional<std::vector<Order> &>, const std::vector<Order> &);
     void getHistoricalPrices();
     void formatHistoricalPrices(json::value const &);
     void calcRSI();

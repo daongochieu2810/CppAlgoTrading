@@ -76,11 +76,11 @@ void TechnicalAnalysis::calcSMA(int period, std::vector<double> &smaData)
     this->data.accessClose(closePrices);
     if (closePrices.size() <= period)
     {
-        std::cout << "Not enough data for " + std::to_string(period) + "-day SMA" << std::endl;
+        std::cout << "Not enough data for " + std::to_string(period) + " SMA" << std::endl;
         return;
     }
 
-    double initialSMA = std::accumulate(closePrices.begin(), closePrices.begin() + 50, 0.0) / period;
+    double initialSMA = std::accumulate(closePrices.begin(), closePrices.begin() + period, 0.0) / period;
     double currentSMA = initialSMA;
     this->data.addData(smaData, initialSMA);
     for (int i = 0; i < closePrices.size() - period; i++)
@@ -103,7 +103,8 @@ void TechnicalAnalysis::calcRSI(int period, std::vector<double> &rsiData)
     std::vector<double> gain, loss, change, avgGain, avgLoss, rs;
     double sumGain, sumLoss;
 
-    auto pushCurrentPeriod = [](const std::vector<double> &currentPeriod, std::vector<double> &change) {
+    auto pushCurrentPeriod = [](const std::vector<double> &currentPeriod, std::vector<double> &change)
+    {
         for (int i = 1; i < currentPeriod.size(); i++)
         {
             change.push_back(currentPeriod[i] - currentPeriod[i - 1]);

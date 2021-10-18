@@ -4,7 +4,8 @@
 #include <iostream>
 #include <numeric>
 #include <vector>
-#include "MarketData.h"
+#include "strategies/MarketData.h"
+#include "strategies/Order.h"
 
 class TechnicalAnalysis
 {
@@ -23,16 +24,6 @@ public:
     void calcStoch(const int, std::vector<double> &);
     //Trend
     void calcPSAR(std::vector<double> &);
-};
-
-class Order
-{
-public:
-    std::string symbol, side, positionSide, type, timeInForce,
-        newClientOrderId, workingType, newOrderRespType, recvWindow;
-    double quantity, price, stopPrice, activationPrice, callbackRate;
-    long timestamp;
-    bool reduceOnly, closePosition, priceProtect;
 };
 
 #endif

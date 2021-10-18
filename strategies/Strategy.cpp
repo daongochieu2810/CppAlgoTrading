@@ -109,3 +109,36 @@ int Strategy::simpleHeikinAshiPsarEMA(const std::vector<double> &openHa,
     }
     return 0;
 }
+
+void Strategy::scalpingMA(const std::string &symbol,
+                          const double currentPrice,
+                          const double ma,
+                          const std::vector<Order> &currentOrders,
+                          std::vector<Order> &toSell,
+                          std::vector<Order> &toBuy,
+                          std::vector<Order> &toCancel)
+{
+    for (int i = 0; i < currentOrders.size(); i++)
+    {
+        const Order currentOrder = currentOrders[i];
+        if (currentOrder.symbol.compare(symbol) == 0 && currentOrder.side.compare("BUY") == 0)
+        {
+            if (currentOrder.status.compare("NEW") == 0 && currentOrder.price < currentPrice)
+            {
+                toCancel.push_back(currentOrder);
+            }
+            else if (currentOrder.status.compare("FILLED") == 0 && currentOrder.price >= currentPrice)
+            {
+                toSell.push_back(currentOrder);
+            }
+        }
+    }
+
+    if (currentPrice >= ma)
+    {
+        Order newOrder;
+        newOrder.symbol = symbol;
+        newOrder.price = currentPrice;
+        toBuy.push_back(newOrder);
+    }
+}

@@ -15,7 +15,7 @@ public:
         openHa, highHa, closeHa, lowHa,
         volume, quoteAssetVolume;
     std::vector<int> numberOfTrades;
-    std::vector<double> fiftyEMA, twoHundredEMA, fiftySMA, twoHundredSMA,
+    std::vector<double> fiftyEMA, twoHundredEMA, twentyMinSMA, fiftySMA, twoHundredSMA,
         rsi, pSar, bollingerBands, stochastic;
     void accessClose(boost::optional<std::vector<double> &>);
     void getClose(std::vector<double> &) const;

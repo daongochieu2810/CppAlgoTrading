@@ -4,10 +4,11 @@
 
 ApiService apiService(binanceSpotTestnet);
 Strategy strategy;
+std::mutex _mtx;
 
+//TODO
 void BotData::newOco(const std::vector<Order> &orders)
 {
-    //TODO
     const Order firstOrder = orders[0];
     std::vector<std::pair<std::string, std::string>> params;
     //mandatory
@@ -303,29 +304,83 @@ void filterTradingPairs(std::list<std::string> &tradingPairs, double minPrice,
     tradingPairs = validPairs;
 }
 
+void BotData::accessOrders(boost::optional<std::vector<Order> &> copy)
+{
+    std::lock_guard<std::mutex> guard(_mtx);
+    if (copy)
+    {
+        copy = bot.globalOrders;
+    }
+}
+
+void BotData::modifyOrders(boost::optional<std::vector<Order> &> copy,
+                           const std::vector<Order> &newOrders)
+{
+    std::lock_guard<std::mutex> guard(_mtx);
+
+    bot.globalOrders = newOrders;
+
+    if (copy)
+    {
+        copy = bot.globalOrders;
+    }
+}
+
 void execOnSinglePair(std::string pair)
 {
     TechnicalAnalysis technicalAnalysis;
     bot.getPriceAction(
-        pair, "1m", -1, -1, 1000, [&technicalAnalysis](HistoricalData &x) -> void
+        pair, "1m", -1, -1, 21, [&technicalAnalysis](HistoricalData &x) -> void
         { technicalAnalysis.setData(x); });
+
+    double price, tempPrice;
+    std::vector<Order> toSell, toBuy, toCancel, globalOrders;
+    bot.getCurrentAveragePrice(pair, price);
+
     while (1)
     {
         //thread t1 is used to prepare data for next time frame
-        std::thread t1(&BotData::getPriceAction, bot, pair, "1m", -1, -1, 1000,
+        std::thread t1(&BotData::getPriceAction, bot, pair, "1m", -1, -1, 21,
                        [&technicalAnalysis](HistoricalData &x) -> void
                        {
                            technicalAnalysis.setTempData(x);
                        });
 
+        std::thread t2(&BotData::getCurrentAveragePrice, bot, std::ref(pair), std::ref(tempPrice));
+        std::thread t3(&TechnicalAnalysis::calcSMA, technicalAnalysis, 20, std::ref(technicalAnalysis.data.twentyMinSMA));
+
+        t3.join();
+
+        bot.accessOrders(globalOrders);
+        strategy.scalpingMA(pair, price, technicalAnalysis.data.twentyMinSMA[0], globalOrders, toSell, toBuy, toCancel);
+        std::cout << price << " " << technicalAnalysis.data.twentyMinSMA[0] << std::endl;
+        std::cout << "To buy:" << std::endl;
+        for (int i = 0; i < toBuy.size(); i++)
+        {
+            std::cout << toBuy[i].symbol << " " << toBuy[i].price << std::endl;
+        }
+
+        std::cout << "To sell:" << std::endl;
+        for (int i = 0; i < toSell.size(); i++)
+        {
+            std::cout << toSell[i].symbol << " " << toSell[i].price << std::endl;
+        }
+
+        std::cout << "To cancel:" << std::endl;
+        for (int i = 0; i < toCancel.size(); i++)
+        {
+            std::cout << toCancel[i].symbol << " " << toCancel[i].price << std::endl;
+        }
+
         t1.join();
+        t2.join();
+        price = tempPrice;
         technicalAnalysis.setData(technicalAnalysis.tempData);
+        toSell.clear();
+        toBuy.clear();
 
-        printHistoricalData(technicalAnalysis);
-
-        //wait for 5 mins
-        //sleep(300);
-        break;
+        sleep(64);
+        //break;
     }
 }
 
@@ -334,19 +389,20 @@ void run()
     bot.getAllTradingPairs(
         [](std::list<std::string> &tradingPairs) -> void
         {
-            double minPrice = 2.0, maxPrice = 1000000.0, minDollarVol = 5000, minChangePercent = 0.5;
+            double minPrice = 2.0, maxPrice = 1000000.0, minDollarVol = 5000, minChangePercent = 0.2;
 
             // Step 1: only get trading pairs that satisfies the conditions mentioned in DEVGUIDE
-            filterTradingPairs(tradingPairs, minPrice, maxPrice, minDollarVol, minChangePercent);
+            //filterTradingPairs(tradingPairs, minPrice, maxPrice, minDollarVol, minChangePercent);
 
-            // std::list<std::string>::iterator it;
-            // for (it = tradingPairs.begin(); it != tradingPairs.end(); ++it)
-            // {
-            //     std::cout << *it << std::endl;
-            // }
+            std::list<std::string>::iterator it;
+            std::cout << tradingPairs.size() << std::endl;
+            for (it = tradingPairs.begin(); it != tradingPairs.end(); ++it)
+            {
+                std::cout << *it << std::endl;
+            }
 
             // Step 2: process each pair with a dedicated thread
-            std::list<std::string>::iterator it;
+            //std::list<std::string>::iterator it;
             std::thread allThreads[tradingPairs.size()];
             int index = 0;
 
@@ -368,10 +424,10 @@ int main(int argc, char *argv[])
         []() -> void
         {
             init();
-            double y;
-            bot.getCurrentAveragePrice("LTCBTC", y);
-            std::cout << y << std::endl;
-            //run();
+            // double y;
+            // bot.getCurrentAveragePrice("LTCBTC", y);
+            // std::cout << y << std::endl;
+            run();
         });
 
     return 0;
