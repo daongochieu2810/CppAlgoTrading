@@ -24,7 +24,6 @@ void BotData::newOrder(Order const &order)
     params.push_back(std::make_pair("type", order.type));
     if (order.type.find("LIMIT") != std::string::npos)
         params.push_back(std::make_pair("timeInForce", "GTC"));
-    params.push_back(std::make_pair("timestamp", std::to_string(order.timestamp)));
     params.push_back(std::make_pair("quantity", std::to_string(order.quantity)));
     //for limit orders
     if (order.price > 0)
@@ -34,19 +33,25 @@ void BotData::newOrder(Order const &order)
         params.push_back(std::make_pair("stopPrice", std::to_string(order.stopPrice)));
 
     //for SIGNED endpoints
+    long timestamp;
+    getTime(timestamp);
+
+    params.push_back(std::make_pair("timestamp", std::to_string(timestamp)));
+
     std::string message, signature;
     apiService.getQueryString(params, message);
     bot.HMACsha256(message, bot.secretKey, signature);
+
     params.push_back(std::make_pair("signature", signature));
 
     apiService.getQueryString(params, message);
-    std::cout << message << std::endl;
+    std::cout << "Message: " << message << std::endl;
 
     apiService.request(methods::POST, "/order", params)
         .then([](http_response response)
               { response.extract_string()
                     .then([](std::string res)
-                          { std::cout << res << std::endl; })
+                          { std::cout << "Executed order: " + res << std::endl; })
                     .wait(); })
         .wait();
 }
@@ -118,21 +123,21 @@ void BotData::getAllOrders(std::string symbol)
     std::vector<std::pair<std::string, std::string>> params;
     params.push_back(std::make_pair("symbol", symbol));
     params.push_back(std::make_pair("timestamp", std::to_string(timestamp)));
+
     //for SIGNED endpoints
     std::string message, signature;
     apiService.getQueryString(params, message);
     bot.HMACsha256(message, bot.secretKey, signature);
     params.push_back(std::make_pair("signature", signature));
-    //apiService.getQueryString(params, message);
-    //std::cout << message << std::endl;
+
+    // apiService.getQueryString(params, message);
+    // std::cout << message << std::endl;
 
     apiService.request(methods::GET, "/allOrders", params)
         .then([](http_response response)
               { response.extract_string()
                     .then([](std::string res)
-                          { std::cout << res << std::endl; })
-                    .wait(); })
-        .wait();
+                          { std::cout << res << std::endl; }); });
 }
 
 void BotData::getOrderBook(std::string symbol, int limit)
@@ -181,7 +186,7 @@ void BotData::setUpKeys()
     std::string line;
     bool isSecretKey = true;
     //ifstream_t secrets("secrets.txt");
-    ifstream_t secrets("secrets_spot_testnet.txt");
+    ifstream_t secrets("../secrets_spot_testnet.txt");
     if (secrets.is_open())
     {
         while (getline(secrets, line))
@@ -213,41 +218,6 @@ void BotData::checkConnectivity()
 void init()
 {
     bot.setUpKeys();
-}
-
-void printHistoricalData(const TechnicalAnalysis &technicalAnalysis)
-{
-    for (double openPrice : technicalAnalysis.data.open)
-    {
-        std::cout << std::setprecision(10) << openPrice << "\n";
-    }
-
-    for (double closePrice : technicalAnalysis.data.close)
-    {
-        std::cout << std::setprecision(10) << closePrice << "\n";
-    }
-    for (double ema : technicalAnalysis.data.fiftyEMA)
-    {
-        std::cout << std::setprecision(10) << ema << ", ";
-    }
-
-    std::cout << std::endl
-              << "------------------------" << std::endl;
-
-    for (double ema : technicalAnalysis.tempData.close)
-    {
-        std::cout << std::setprecision(10) << ema << ", ";
-    }
-
-    std::cout << std::endl
-              << "------------------------" << std::endl;
-
-    for (double ema : technicalAnalysis.data.fiftyEMA)
-    {
-        std::cout << std::setprecision(10) << ema << ", ";
-    }
-
-    std::cout << std::endl;
 }
 
 void BotData::HMACsha256(std::string const &message, std::string const &key, std::string &signature)
@@ -336,8 +306,9 @@ void execOnSinglePair(std::string pair)
     double price, tempPrice;
     std::vector<Order> toSell, toBuy, toCancel, globalOrders;
     bot.getCurrentAveragePrice(pair, price);
+    int round = 0;
 
-    while (1)
+    while (round++ < 100)
     {
         //thread t1 is used to prepare data for next time frame
         std::thread t1(&BotData::getPriceAction, bot, pair, "1m", -1, -1, 21,
@@ -353,24 +324,18 @@ void execOnSinglePair(std::string pair)
 
         bot.accessOrders(globalOrders);
         strategy.scalpingMA(pair, price, technicalAnalysis.data.twentyMinSMA[0], globalOrders, toSell, toBuy, toCancel);
-        std::cout << price << " " << technicalAnalysis.data.twentyMinSMA[0] << std::endl;
-        std::cout << "To buy:" << std::endl;
+
         for (int i = 0; i < toBuy.size(); i++)
         {
-            std::cout << toBuy[i].symbol << " " << toBuy[i].price << std::endl;
+            bot.newOrder(toBuy[i]);
         }
 
-        std::cout << "To sell:" << std::endl;
         for (int i = 0; i < toSell.size(); i++)
         {
-            std::cout << toSell[i].symbol << " " << toSell[i].price << std::endl;
+            bot.newOrder(toSell[i]);
         }
 
-        std::cout << "To cancel:" << std::endl;
-        for (int i = 0; i < toCancel.size(); i++)
-        {
-            std::cout << toCancel[i].symbol << " " << toCancel[i].price << std::endl;
-        }
+        bot.getAllOrders(pair);
 
         t1.join();
         t2.join();

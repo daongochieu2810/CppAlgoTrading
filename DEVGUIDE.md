@@ -6,6 +6,7 @@
 
 - Binance asks for 2 keys: secret key and API key, these can be obtained from the website
 - For Future and Spot Testnets, the same procedure applies
+- Make a `secrets_*.txt` file, place the secret key first, then the api key second (just the content, and the file should only have 2 lines)
 
 2. For account-related endpoints, a signature needs to be computed and sent together as query param/body. This is done by `BotData::HMACsha256`
 

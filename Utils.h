@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cpprest/json.h>
+#include <iostream>
 #include <stdlib.h>
 
 using namespace std::chrono;
@@ -57,4 +58,39 @@ void benchmarkPerformance(void fnc())
     auto t2 = high_resolution_clock::now();
     duration<double, std::milli> ms_double = t2 - t1;
     std::cout << ms_double.count() << "ms\n";
+}
+
+void printHistoricalData(const TechnicalAnalysis &technicalAnalysis)
+{
+    for (double openPrice : technicalAnalysis.data.open)
+    {
+        std::cout << std::setprecision(10) << openPrice << "\n";
+    }
+
+    for (double closePrice : technicalAnalysis.data.close)
+    {
+        std::cout << std::setprecision(10) << closePrice << "\n";
+    }
+    for (double ema : technicalAnalysis.data.fiftyEMA)
+    {
+        std::cout << std::setprecision(10) << ema << ", ";
+    }
+
+    std::cout << std::endl
+              << "------------------------" << std::endl;
+
+    for (double ema : technicalAnalysis.tempData.close)
+    {
+        std::cout << std::setprecision(10) << ema << ", ";
+    }
+
+    std::cout << std::endl
+              << "------------------------" << std::endl;
+
+    for (double ema : technicalAnalysis.data.fiftyEMA)
+    {
+        std::cout << std::setprecision(10) << ema << ", ";
+    }
+
+    std::cout << std::endl;
 }

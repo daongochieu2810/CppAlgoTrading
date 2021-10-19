@@ -129,7 +129,14 @@ void Strategy::scalpingMA(const std::string &symbol,
             }
             else if (currentOrder.status.compare("FILLED") == 0 && currentOrder.price >= currentPrice)
             {
-                toSell.push_back(currentOrder);
+                Order newSellOrder;
+                newSellOrder.symbol = symbol;
+                newSellOrder.side = "SELL";
+                newSellOrder.type = "MARKET";
+                newSellOrder.price = -1;
+                newSellOrder.stopPrice = -1;
+                newSellOrder.quantity = currentOrder.quantity;
+                toSell.push_back(newSellOrder);
             }
         }
     }
@@ -138,7 +145,11 @@ void Strategy::scalpingMA(const std::string &symbol,
     {
         Order newOrder;
         newOrder.symbol = symbol;
-        newOrder.price = currentPrice;
+        newOrder.side = "BUY";
+        newOrder.type = "MARKET";
+        newOrder.quantity = 2;
+        newOrder.price = -1;
+        newOrder.stopPrice = -1;
         toBuy.push_back(newOrder);
     }
 }
